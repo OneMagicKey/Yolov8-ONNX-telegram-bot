@@ -20,7 +20,7 @@ class YoloTestCases(unittest.TestCase):
             assert False
 
     @staticmethod
-    def load_detection_model(path: str = '../checkpoints/detection/yolov5n.onnx'):
+    def load_detection_model(path: str = '../checkpoints/detection/yolov8n.onnx'):
         return YoloOnnxDetection(path, input_size=(640, 640))
 
     @staticmethod

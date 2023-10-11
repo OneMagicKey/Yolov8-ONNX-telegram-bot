@@ -119,9 +119,7 @@ async def model_command(message: types.Message):
         text = 'Select the model \n\n'
 
     await message.answer(text, parse_mode='markdown', reply_markup=types.InlineKeyboardMarkup(inline_keyboard=[
-        [types.InlineKeyboardButton(text='yolov5n', callback_data='yolov5n'),
-         types.InlineKeyboardButton(text='yolov8n', callback_data='yolov8n')],
-        [types.InlineKeyboardButton(text='yolov5n-seg', callback_data='yolov5n-seg'),
+        [types.InlineKeyboardButton(text='yolov8n', callback_data='yolov8n'),
          types.InlineKeyboardButton(text='yolov8n-seg', callback_data='yolov8n-seg')]
     ]))
 
@@ -220,8 +218,7 @@ def main():
 
 
 if __name__ == "__main__":
-    model_list = [('detection', 'yolov8n'), ('detection', 'yolov5n'),
-                  ('segmentation', 'yolov8n-seg'), ('segmentation', 'yolov5n-seg')]
+    model_list = [('detection', 'yolov8n'), ('segmentation', 'yolov8n-seg')]
 
     model_types = {'segmentation': YoloOnnxSegmentation, 'detection': YoloOnnxDetection}
 
