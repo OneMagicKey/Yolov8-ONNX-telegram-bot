@@ -1,6 +1,5 @@
 from functools import wraps
 from collections import Counter
-import asyncio
 import cv2
 import io
 import numpy as np
@@ -8,11 +7,19 @@ import os
 import logging
 
 import aiogram
+from aiohttp import web
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+
 from model.model import YoloOnnxSegmentation, YoloOnnxDetection
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
+WEBHOOK_PATH = f"/bot/{TOKEN}"
+WEBHOOK_URL = os.getenv('RENDER_EXTERNAL_URL') + WEBHOOK_PATH
+
+WEBAPP_HOST = "0.0.0.0"
+WEBAPP_PORT = os.getenv("PORT", default=8000)
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -182,15 +189,35 @@ async def callback_language(call: types.CallbackQuery):
     await bot.send_message(user_id, text)
 
 
-async def main():
-    await bot.delete_webhook(drop_pending_updates=True)
-    await bot.set_my_commands([
-        types.BotCommand(command="start", description="start the bot"),
-        types.BotCommand(command="help", description="list of available commands"),
-        types.BotCommand(command="settings", description="set language preferences"),
-        types.BotCommand(command="model", description="select the model"),
-    ])
-    await dp.start_polling(bot)
+async def on_startup() -> None:
+    await bot.set_webhook(f"{WEBHOOK_URL}")
+
+
+async def on_shutdown():
+    await bot.session.close()
+
+
+def main():
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
+
+    # Create aiohttp.web.Application instance
+    app = web.Application()
+
+    # Create an instance of request handler
+    webhook_requests_handler = SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot
+    )
+    # Register webhook handler on application
+    webhook_requests_handler.register(app, path=WEBHOOK_PATH)
+
+    # Mount dispatcher startup and shutdown hooks to aiohttp application
+    setup_application(app, dp, bot=bot)
+
+    # And finally start webserver
+    web.run_app(app, host=WEBAPP_HOST, port=WEBAPP_PORT)
+
 
 if __name__ == "__main__":
     model_list = [('detection', 'yolov8n'), ('detection', 'yolov5n'),
@@ -207,4 +234,4 @@ if __name__ == "__main__":
     for model in models.values():
         _ = model(test_img)
 
-    asyncio.run(main())
+    main()
