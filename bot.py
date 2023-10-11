@@ -188,6 +188,7 @@ async def callback_language(call: types.CallbackQuery):
 
 
 async def on_startup() -> None:
+    await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_webhook(f"{WEBHOOK_URL}")
 
 
