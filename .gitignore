@@ -1,0 +1,19 @@
+.idea
+/.ipynb_checkpoints/
+/.*
+!/.gitignore
+__pycache__/
+*.ipynb
+*.py[cod]
+*.txt
+/yolo_bot_env/
+
+# checkpoints
+*.onnx
+!checkpoints/segmentation/*.onnx
+!checkpoints/detection/*.onnx
+
+# example images
+*.jpg
+!images/bus.jpg
+!images/zidane.jpg
