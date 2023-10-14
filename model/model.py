@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 from collections import namedtuple
+
 import cv2
 import numpy as np
 
-from model.plots import Colors, COCO_names_en, COCO_names_ru
-from model.utils import xywh2box, xywh2xyxy, draw_box, draw_masks, letterbox, process_masks
+from model.plots import COCO_names_en, COCO_names_ru, Colors
+from model.utils import draw_box, draw_masks, letterbox, process_masks, xywh2box, xywh2xyxy
 
 
 class YoloOnnx(ABC):
@@ -36,9 +37,12 @@ class YoloOnnx(ABC):
         :param img: np.array of shape (h, w, 3)
         :return: (boxes_array) or (boxes_and_masks_array, protos_array)
         """
-        blob = cv2.dnn.blobFromImage(img, 1/255.0, self.input_size[::-1], swapRB=True, crop=False)  # bs, c, h, w
+        (w, h) = self.input_size[::-1]
+        blob = cv2.dnn.blobFromImage(img, 1/255.0, (w, h), swapRB=True, crop=False)  # bs, c, h, w
         self.model.setInput(blob)
-        output = self.model.forward(outBlobNames=self.model.getUnconnectedOutLayersNames())
+
+        out_blob_names = self.model.getUnconnectedOutLayersNames()
+        output = self.model.forward(outBlobNames=out_blob_names)
 
         return output
 
@@ -77,15 +81,15 @@ class YoloOnnx(ABC):
         output, probs_idx = self.version_handler(output, nc)
 
         classes = output[..., probs_idx:probs_idx+nc].argmax(axis=-1)
-        boxes = xywh2box(output[..., :4], ratio, padw=pad[0], padh=pad[1]).astype(np.uint16)
+        boxes = xywh2box(output[..., :4], ratio, padw=pad[0], padh=pad[1])
         confs = output[..., probs_idx:probs_idx+nc][np.arange(classes.shape[-1]), classes]
 
         indices = cv2.dnn.NMSBoxes(boxes, confs, self.conf, self.iou)
         indices = list(indices)
 
         if return_masks:
-            masks = output[..., probs_idx+nc:]
-            return classes[indices], confs[indices], xywh2xyxy(boxes[indices]), masks[indices]
+            masks = output[indices, probs_idx+nc:]
+            return classes[indices], confs[indices], xywh2xyxy(boxes[indices]), masks
 
         return classes[indices], confs[indices], xywh2xyxy(boxes[indices])
 
@@ -184,9 +188,9 @@ class YoloOnnxSegmentation(YoloOnnx):
         return classes, confs, boxes, masks
 
     def __call__(self, img: np.ndarray, raw: bool = False):
-        shape = img.shape  # (h, w)
+        shape = img.shape[:2]  # (h, w)
         img, ratio, pad = letterbox(img, self.input_size)
         raw_outputs = self.forward_pass(img)
-        classes, confs, boxes, masks = self.postprocess(raw_outputs, ratio, pad, shape[:2])
+        classes, confs, boxes, masks = self.postprocess(raw_outputs, ratio, pad, shape)
 
         return raw_outputs if raw else (classes, confs, boxes, masks)

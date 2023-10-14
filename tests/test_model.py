@@ -1,8 +1,10 @@
-import unittest
-import cv2
-import numpy as np
 import os
 import timeit
+import unittest
+
+import cv2
+import numpy as np
+
 from model.model import YoloOnnxDetection, YoloOnnxSegmentation
 
 
@@ -54,7 +56,7 @@ class YoloTestCases(unittest.TestCase):
         img, yolo = self.img, self.detection_model
 
         output = yolo(img)
-        result_list = yolo.print_results(*output, language='ru')
+        result_list = yolo.print_results(*output, language='en')
 
         self.assertIsInstance(result_list, list)
 
@@ -63,7 +65,7 @@ class YoloTestCases(unittest.TestCase):
         path_save_to = "result_segmentation.jpg"
 
         classes, confs, boxes, masks = yolo(img)
-        yolo.render(img, classes, confs, boxes, masks, save_path=path_save_to, language='ru', hide_conf=False)
+        yolo.render(img, classes, confs, boxes, masks, save_path=path_save_to)
 
         assert os.path.exists(path_save_to)
 

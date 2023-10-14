@@ -119,14 +119,21 @@ async def model_command(message: types.Message):
     ]))
 
 
-async def model_forward(img: np.ndarray, model_name: str = 'yolov8n', language: str = 'en'):
+async def model_forward(img: np.ndarray, user_id: int) -> tuple[np.ndarray, str]:
+    language, model_name = usr_language[user_id], usr_model[user_id]
     net: YoloOnnxDetection | YoloOnnxSegmentation = models[model_name]
 
     result = net(img)
     result_img = net.render(img, *result, hide_conf=False, language=language)
     result_list = net.print_results(*result, language=language)
 
-    return result_img, result_list
+    counter = Counter(info.class_name for info in result_list)
+    if not counter:
+        text = 'Ничего не нашел' if usr_language[user_id] == 'ru' else 'No detections'
+    else:
+        text = '\n'.join(f'{count} {name}' for (name, count) in counter.items())
+
+    return result_img, text
 
 
 @dp.message(aiogram.F.photo)
@@ -139,14 +146,7 @@ async def process_image(message: types.Message):
     await bot.download(message.photo[-1], destination=file_io)
     img = cv2.imdecode(np.frombuffer(file_io.read(), np.uint8), cv2.IMREAD_COLOR)
 
-    model_name = usr_model[user_id]
-
-    result_img, result_list = await model_forward(img, model_name, language=usr_language[user_id])
-    counter = Counter(info.class_name for info in result_list)
-    if not counter:
-        text = 'Ничего не нашел' if usr_language[user_id] == 'ru' else 'No detections'
-    else:
-        text = '\n'.join(f'{count} {name}' for (name, count) in counter.items())
+    result_img, text = await model_forward(img, user_id)
 
     _, img_encode = cv2.imencode('.jpg', result_img)
     result_img = types.BufferedInputFile(img_encode.tobytes(), 'result_img')
