@@ -1,16 +1,18 @@
-from functools import wraps
-from collections import Counter
 import asyncio
-import cv2
 import io
-import numpy as np
-import os
 import logging
+import os
+from collections import Counter
+from functools import wraps
 
 import aiogram
+import cv2
+import numpy as np
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
-from model.model import YoloOnnxSegmentation, YoloOnnxDetection
+
+from model.model import YoloOnnxDetection, YoloOnnxSegmentation
+
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
