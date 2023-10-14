@@ -70,7 +70,7 @@ def draw_masks(img: np.ndarray, masks: np.ndarray, colors: list[tuple[int, int, 
     h, w = img.shape[:2]
     # save memory
     masks = masks.astype(np.uint8).transpose(1,2,0)
-    masks = cv2.resize(masks, (160, 160), interpolation=cv2.INTER_NEAREST)
+    masks = cv2.resize(masks, (640, 640), interpolation=cv2.INTER_NEAREST)
     masks = masks if len(masks.shape) > 2 else masks[..., None]
 
     colors = np.array(colors, dtype=np.uint8)[None, None, ...]  # (1, 1, n, 3)
@@ -139,7 +139,8 @@ def process_masks(protos: np.ndarray, masks_in: np.ndarray, boxes: np.ndarray,
     bottom, right = mh - round(padh + 0.01), mw - round(padw + 0.01)
     masks = masks[:, top:bottom, left:right].transpose(1,2,0)
 
-    masks = cv2.resize(masks, dsize=original_img_shape[::-1], interpolation=cv2.INTER_NEAREST)  # (h, w, n)
+    masks = cv2.resize(masks, dsize=original_img_shape[::-1], interpolation=cv2.INTER_LINEAR)  # (h, w, n)
+    masks = masks.astype(np.float16)
     masks = masks if len(masks.shape) > 2 else masks[..., None]
     masks = crop_mask(masks.transpose(2,0,1), boxes)  # (n, h, w)
 
