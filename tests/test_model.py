@@ -13,6 +13,7 @@ class YoloTestCases(unittest.TestCase):
             cls.detection_model = cls.load_detection_model()
             cls.segmentation_model = cls.load_segmentation_model()
             cls.img = cls.load_img()
+            cls.img_empty = cls.create_empty_img()
         except:
             assert False
 
@@ -27,6 +28,13 @@ class YoloTestCases(unittest.TestCase):
     @staticmethod
     def load_img(path: str = '../images/zidane.jpg'):
         return cv2.imread(path, cv2.IMREAD_COLOR)
+
+    @staticmethod
+    def create_empty_img():
+        img = np.zeros((512, 512, 3), dtype=np.uint8)
+        img.fill(255)
+
+        return img
 
     def test_detection(self):
         img, yolo = self.img, self.detection_model
@@ -67,6 +75,29 @@ class YoloTestCases(unittest.TestCase):
         yolo.render(img, classes, confs, boxes, save_path=path_save_to)
 
         assert os.path.exists(path_save_to)
+
+    def test_render_empty_segmentation(self):
+        img, yolo = self.img_empty, self.segmentation_model
+        path_save_to = "white_seg.jpg"
+
+        classes, confs, boxes, masks = yolo(img)
+        yolo.render(img, classes, confs, boxes, masks, save_path=path_save_to)
+        result_list = yolo.print_results(classes, confs, boxes, masks)
+
+        assert os.path.exists(path_save_to)
+        self.assertEqual(len(result_list), 0)
+
+    def test_render_empty_detection(self):
+        img, yolo = self.img_empty, self.detection_model
+        path_save_to = "white_det.jpg"
+
+        classes, confs, boxes = yolo(img)
+        yolo.render(img, classes, confs, boxes, save_path=path_save_to)
+        result_list = yolo.print_results(classes, confs, boxes)
+
+        assert os.path.exists(path_save_to)
+        self.assertEqual(len(result_list), 0)
+
 
     # Performance
     # def test_many_detections(self, num_calls: int = 5):
