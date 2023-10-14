@@ -3,7 +3,7 @@ import numpy as np
 
 
 def xywh2box(boxes: np.ndarray, scale: float, padw: float, padh: float) -> np.ndarray:
-    """ Convert (x,y,w,h) to (x,y,w,h) in original image size """
+    """Convert (x,y,w,h) to (x,y,w,h) in original image size"""
     boxes[..., [0, 1]] -= 0.5 * boxes[..., [2, 3]]
     boxes[..., [0, 1]] -= np.array([padw, padh])
     boxes /= scale
@@ -12,10 +12,22 @@ def xywh2box(boxes: np.ndarray, scale: float, padw: float, padh: float) -> np.nd
 
 
 def xywh2xyxy(boxes: np.ndarray) -> np.ndarray:
-    """ Convert (x,y,w,h) to (x1,y1,x2,y2) """
+    """Convert (x,y,w,h) to (x1,y1,x2,y2)"""
     boxes[..., [2, 3]] += boxes[..., [0, 1]]
 
     return boxes
+
+
+def xyxy2new_shape(boxes: np.ndarray, old_shape, new_shape) -> np.ndarray:
+    """Convert box coords (x1,y1,x2,y2) to the new shape"""
+    h_old, w_old = old_shape
+    h_new, w_new = new_shape
+    boxes = boxes.astype(np.float32)
+
+    boxes[..., [0, 2]] *= w_new / w_old
+    boxes[..., [1, 3]] *= h_new / h_old
+
+    return boxes.astype(np.uint16)
 
 
 def crop_mask(masks: np.ndarray, boxes: np.ndarray) -> np.ndarray:
@@ -24,26 +36,35 @@ def crop_mask(masks: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     "Crop" predicted masks by zeroing out everything not in the predicted bbox.
     Vectorized by Chong (thanks Chong).
 
-    :param masks: should be a size [n, h, w] tensor of masks
-    :param boxes: should be a size [n, 4] tensor of bbox coords in relative point form
-    :return: cropped masks (n, h, w)
+    :param masks: should be a size (h, w, n) array of masks
+    :param boxes: should be a size (n, 4) array of bbox coords in relative point form
+    :return: cropped masks (h, w, n)
     """
 
-    n, h, w = masks.shape
-    x1, y1, x2, y2 = np.split(boxes[:, :, None], 4, 1)  # x1 shape(n, 1, 1)
+    h, w, n = masks.shape
+    x1, y1, x2, y2 = np.split(boxes.transpose()[None, ...], 4, 1)  # x1 shape(1, 1, n)
 
-    r = np.arange(w, dtype=x1.dtype)[None, None, :]  # rows shape(1, 1, w)
-    c = np.arange(h, dtype=x1.dtype)[None, :, None]  # cols shape(1, h, 1)
+    r = np.arange(w, dtype=x1.dtype)[None, :, None]  # rows shape(1, w, 1)
+    c = np.arange(h, dtype=x1.dtype)[:, None, None]  # cols shape(h, 1, 1)
 
     return masks * ((r >= x1) * (r < x2) * (c >= y1) * (c < y2))
 
 
-def draw_box(img: np.ndarray, label: str, color: tuple[int, int, int],
-             confidence: float, hide_conf: bool, x1: int, y1: int, x2: int, y2: int) -> None:
+def draw_box(
+    img: np.ndarray,
+    label: str,
+    color: tuple[int, int, int],
+    confidence: float,
+    hide_conf: bool,
+    x1: int,
+    y1: int,
+    x2: int,
+    y2: int,
+) -> None:
     """
     Draw bounding box and label on the input image.
     """
-    label = f'{label}' if hide_conf else f'{label} {confidence:.2f}'
+    label = f"{label}" if hide_conf else f"{label} {confidence:.2f}"
     th, fs = 2, 0.65  # thickness, fontScale
     lt, ff = cv2.LINE_AA, cv2.FONT_HERSHEY_COMPLEX  # lineType, fontFace
     w, h = cv2.getTextSize(label, ff, fs, th)[0]
@@ -53,25 +74,26 @@ def draw_box(img: np.ndarray, label: str, color: tuple[int, int, int],
     cv2.putText(img, label, (x1 - th, y1 - th), ff, fs, (255, 255, 255), th, lt)
 
 
-def draw_masks(img: np.ndarray, masks: np.ndarray, colors: list[tuple[int, int, int]],
-               alpha: float = 0.4) -> np.ndarray:
+def draw_masks(
+    img: np.ndarray,
+    masks: np.ndarray,
+    colors: list[tuple[int, int, int]],
+    alpha: float = 0.4,
+) -> np.ndarray:
     """
     Draw masks on the input image.
 
     :param img: image with shape (h, w, 3)
-    :param masks: masks with shape (n, h, w), n is number of masks after nms
+    :param masks: masks with shape (mask_height, mask_width, n), n is number of masks after nms
     :param colors: list of RGB color tuples, (n, 3)
     :param alpha: masks weight, 0 < alpha < 1
     :return: input image with the masks
     """
-    if not masks.shape[0]:
+    # No masks after nms
+    if not masks.shape[-1]:
         return img
 
     h, w = img.shape[:2]
-    # save memory
-    masks = masks.astype(np.uint8).transpose(1,2,0)
-    masks = cv2.resize(masks, (640, 640), interpolation=cv2.INTER_NEAREST)
-    masks = masks if len(masks.shape) > 2 else masks[..., None]
 
     colors = np.array(colors, dtype=np.uint8)[None, None, ...]  # (1, 1, n, 3)
     masks = masks[..., None]  # (h, w, n, 1)
@@ -80,12 +102,14 @@ def draw_masks(img: np.ndarray, masks: np.ndarray, colors: list[tuple[int, int, 
 
     colored_masks = cv2.resize(colored_masks, (w, h), interpolation=cv2.INTER_NEAREST)
     img, alpha, colored_masks = map(np.float16, [img, alpha, colored_masks])
-    img = np.where(colored_masks > 0, img * (1-alpha), img) + colored_masks * alpha
+    img = np.where(colored_masks > 0, img * (1 - alpha), img) + colored_masks * alpha
 
     return img
 
 
-def letterbox(img: np.ndarray, input_size: tuple) -> tuple[np.ndarray, float, tuple[float, float]]:
+def letterbox(
+    img: np.ndarray, input_size: tuple
+) -> tuple[np.ndarray, float, tuple[float, float]]:
     """
     Resize the image to predefined model input size preserving the aspect ratio, pad if needed.
 
@@ -103,15 +127,21 @@ def letterbox(img: np.ndarray, input_size: tuple) -> tuple[np.ndarray, float, tu
     img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_AREA)
     top, bottom = map(round, [padh - 0.1, padh + 0.1])
     left, right = map(round, [padw - 0.1, padw + 0.1])
-    img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT,
-                             value=(0, 0, 0))
+    img = cv2.copyMakeBorder(
+        img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0)
+    )
 
     return img, scale, (padw, padh)
 
 
-def process_masks(protos: np.ndarray, masks_in: np.ndarray, boxes: np.ndarray,
-                  input_size: tuple[int, int], original_img_shape: tuple[int, int],
-                  pad: tuple[float, float]) -> np.ndarray:
+def process_masks(
+    protos: np.ndarray,
+    masks_in: np.ndarray,
+    boxes: np.ndarray,
+    input_size: tuple[int, int],
+    original_img_shape: tuple[int, int],
+    pad: tuple[float, float],
+) -> np.ndarray:
     # Inspired by https://github.com/ultralytics/yolov5/blob/master/utils/segment/general.py
     """
     Create image masks from output masks and protos.
@@ -122,26 +152,34 @@ def process_masks(protos: np.ndarray, masks_in: np.ndarray, boxes: np.ndarray,
     :param input_size: predefined size of the model input, (model_height, model_width)
     :param original_img_shape: image spatial shape before preprocessing, (h, w)
     :param pad: initial pad for restore masks to original size
-    :return: masks with shape (n, h, w)
+    :return: masks with shape (model_height - 2*padh, model_width-2*padw, n)
     """
+    # No masks after nms
     if not masks_in.shape[0]:
-        # no detection
-        return masks_in
+        return np.zeros((*original_img_shape, 0), dtype=bool)
+
     c, mh, mw = protos.shape
 
-    def sigmoid(x: np.ndarray) -> np.ndarray: return 1.0 / (1.0 + np.exp(-x))
+    def sigmoid(x: np.ndarray) -> np.ndarray:
+        return 1.0 / (1.0 + np.exp(-x))
+
     masks = sigmoid(masks_in @ protos.view().reshape(c, -1)).view().reshape(-1, mh, mw)  # (n, mh, mw)
 
-    gain = min(mh / input_size[0], mw / input_size[1])    # 0.25 predefined by yolo
+    gain = min(mh / input_size[0], mw / input_size[1])  # 0.25 predefined by yolo
     padw, padh = pad[0] * gain, pad[1] * gain
 
+    # remove padding from the masks
     top, left = round(padh - 0.01), round(padw - 0.01)
     bottom, right = mh - round(padh + 0.01), mw - round(padw + 0.01)
-    masks = masks[:, top:bottom, left:right].transpose(1,2,0)
+    masks = masks[:, top:bottom, left:right].transpose(1, 2, 0)
 
-    masks = cv2.resize(masks, dsize=original_img_shape[::-1], interpolation=cv2.INTER_LINEAR)  # (h, w, n)
-    masks = masks.astype(np.float16)
-    masks = masks if len(masks.shape) > 2 else masks[..., None]
-    masks = crop_mask(masks.transpose(2,0,1), boxes)  # (n, h, w)
+    # upsample masks to shape (model_height - 2*padh, model_width - 2*padw)
+    up_w, up_h = map(round, [(right - left) / gain, (bottom - top) / gain])
+    boxes_scaled = boxes.copy()
+    boxes_scaled = xyxy2new_shape(boxes_scaled, original_img_shape, (up_h, up_w))
+
+    masks = cv2.resize(masks, dsize=(up_w, up_h), interpolation=cv2.INTER_LINEAR)  # (up_h, up_w, n)
+    masks = masks[..., None] if len(masks.shape) == 2 else masks
+    masks = crop_mask(masks.astype(np.float16), boxes_scaled)  # (up_h, up_w, n)
 
     return masks > 0.5
