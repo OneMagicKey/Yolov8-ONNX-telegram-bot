@@ -94,15 +94,19 @@ def draw_masks(
         return img
 
     h, w = img.shape[:2]
+    mh, mw, n = masks.shape
 
     colors = np.array(colors, dtype=np.uint8)[None, None, ...]  # (1, 1, n, 3)
-    masks = masks[..., None]  # (h, w, n, 1)
-    colored_masks = colors * masks  # (h, w, n, 3)
-    colored_masks = colored_masks.max(axis=2)  # take only 1 color, merge channels in case of overlapping
+    masks = masks[..., None]  # (mask_height, mask_width, n, 1)
+    colored_mask = np.zeros((mh, mw, 3), dtype=np.uint8)
+    for i in range(n):
+        colored_mask = np.where(
+            colored_mask == 0, masks[:, :, i] * colors[:, :, i], colored_mask
+        )
 
-    colored_masks = cv2.resize(colored_masks, (w, h), interpolation=cv2.INTER_NEAREST)
-    img, alpha, colored_masks = map(np.float16, [img, alpha, colored_masks])
-    img = np.where(colored_masks > 0, img * (1 - alpha), img) + colored_masks * alpha
+    colored_mask = cv2.resize(colored_mask, (w, h), interpolation=cv2.INTER_AREA)
+    img, alpha, colored_mask = map(np.float16, [img, alpha, colored_mask])
+    img = np.where(colored_mask > 0, img * (1 - alpha), img) + colored_mask * alpha
 
     return img
 
