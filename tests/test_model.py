@@ -20,15 +20,17 @@ class YoloTestCases(unittest.TestCase):
             assert False
 
     @staticmethod
-    def load_detection_model(path: str = '../checkpoints/detection/yolov5n.onnx'):
+    def load_detection_model(path: str = "../checkpoints/detection/yolov8n.onnx"):
         return YoloOnnxDetection(path, input_size=(640, 640))
 
     @staticmethod
-    def load_segmentation_model(path: str = '../checkpoints/segmentation/yolov8n-seg.onnx'):
+    def load_segmentation_model(
+        path: str = "../checkpoints/segmentation/yolov8n-seg.onnx",
+    ):
         return YoloOnnxSegmentation(path, input_size=(640, 640))
 
     @staticmethod
-    def load_img(path: str = '../images/zidane.jpg'):
+    def load_img(path: str = "../images/zidane.jpg"):
         return cv2.imread(path, cv2.IMREAD_COLOR)
 
     @staticmethod
@@ -56,7 +58,7 @@ class YoloTestCases(unittest.TestCase):
         img, yolo = self.img, self.detection_model
 
         output = yolo(img)
-        result_list = yolo.print_results(*output, language='en')
+        result_list = yolo.print_results(*output, language="en")
 
         self.assertIsInstance(result_list, list)
 
@@ -100,7 +102,6 @@ class YoloTestCases(unittest.TestCase):
         assert os.path.exists(path_save_to)
         self.assertEqual(len(result_list), 0)
 
-
     # Performance
     # def test_many_detections(self, num_calls: int = 5):
     #     img, yolo = self.img, self.load_detection_model()
@@ -117,5 +118,5 @@ class YoloTestCases(unittest.TestCase):
     #     print(f'{first_time_inference:.3f}s {mean_time_inference:.3f}s')
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
