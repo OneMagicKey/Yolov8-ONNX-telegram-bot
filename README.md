@@ -1,18 +1,22 @@
-[//]: # (![GitHub top language]&#40;https://img.shields.io/github/languages/top/OneMagicKey/Yolov8-ONNX-telegram-bot?style=flat-square&#41; ![]&#40;https://img.shields.io/github/repo-size/OneMagicKey/Yolov8-ONNX-telegram-bot?style=flat-square&#41; [![GitHub license]&#40;https://img.shields.io/github/license/OneMagicKey/Yolov8-ONNX-telegram-bot?style=flat-square&#41;]&#40;https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/master/LICENSE&#41;)
+<h2 align="center">YOLOv8-ONNX-telegram-bot</h2>
 
-# YOLOv8-ONNX-telegram-bot
+<p align="center">
+<img src="https://img.shields.io/github/languages/top/OneMagicKey/Yolov8-ONNX-telegram-bot">
+<img src ="https://img.shields.io/github/repo-size/OneMagicKey/Yolov8-ONNX-telegram-bot">
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
 Telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8 implemented on python + openCV DNN + ONNX.
 
 - [x] ENG / RU languages
 - [x] Object Detection / Instance Segmentation
-- [x] Supports webhooks to deploy as webservice
-- [x] Supports pooling to run bot locally
+- [x] Support webhooks to deploy as webservice
+- [x] Support pooling to run bot locally
 
 ## Run bot locally
 1) Create telegram bot with BotFather
 2) Clone the repo: `git clone https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot.git`
 3) Install all the dependencies: `pip install -r requirements.txt`
-4) Add `TELEGRAM_TOKEN` provided by Botfather to the python environment
+4) Add `TELEGRAM_TOKEN` provided by BotFather to the python environment
 5) Run `bot.py`
 
 ## Deploy on [render](https://render.com)
@@ -22,7 +26,7 @@ Telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8 
    * Branch - `webhooks-render`
    * Build Command - `pip install -r requirements.txt`
    * Start Command - `python bot.py`
-3) Add `TELEGRAM_TOKEN` provided by Botfather to the render environment
+3) Add `TELEGRAM_TOKEN` provided by BotFather to the render environment
 4) Deploy the app
 
 ## Reference
