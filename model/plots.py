@@ -28,7 +28,7 @@ class Colors:
         self.palette = [self.hex2rgb(f"#{c}") for c in hexs]
         self.n = len(self.palette)
 
-    def __call__(self, i, bgr=False):
+    def __call__(self, i, bgr=True):
         c = self.palette[int(i) % self.n]
         return (c[2], c[1], c[0]) if bgr else c
 
