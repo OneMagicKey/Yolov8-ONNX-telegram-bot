@@ -84,9 +84,9 @@ def draw_masks(
     Draw masks on the input image.
 
     :param img: image with shape (h, w, 3)
-    :param masks: masks with shape (mask_height, mask_width, n), n is number of masks after nms
-    :param colors: list of RGB color tuples, (n, 3)
-    :param alpha: masks weight, 0 < alpha < 1
+    :param masks: bool masks with shape (mask_height, mask_width, n), n is number of masks after nms
+    :param colors: list of BGR color tuples, (n, 3)
+    :param alpha: masks weight in the result image, 0 <= alpha <= 1
     :return: input image with the masks
     """
     # No masks after nms
