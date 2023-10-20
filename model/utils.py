@@ -97,11 +97,11 @@ def draw_masks(
     alpha = np.float32(alpha)
     colors = np.asarray(colors, dtype=np.uint8)[None, None, ...]  # (1, 1, n, 3)
     masks = masks[..., None]  # (mask_height, mask_width, n, 1)
-    colored_mask = np.zeros((mh, mw, 3), dtype=np.uint8)
-    for i in range(n):
-        colored_mask = np.where(
-            colored_mask == 0, masks[:, :, i] * colors[:, :, i], colored_mask
-        )
+
+    # subsampling every 5th pixel and sort by mask size,
+    # then reindex to put the smallest objects on the foreground
+    ids = np.argsort(masks[::5, ::5].sum(axis=(0, 1, 3)))
+    masks, colors = masks[..., ids, :], colors[..., ids, :]
 
     indices = masks.argmax(axis=2, keepdims=True)
     colored_mask = np.take_along_axis(masks * colors, indices, axis=2)  # (mask_height, mask_width, 1, 3)
