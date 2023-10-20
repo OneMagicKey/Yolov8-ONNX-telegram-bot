@@ -94,9 +94,8 @@ def draw_masks(
         return img
 
     h, w = img.shape[:2]
-    mh, mw, n = masks.shape
-
-    colors = np.array(colors, dtype=np.uint8)[None, None, ...]  # (1, 1, n, 3)
+    alpha = np.float32(alpha)
+    colors = np.asarray(colors, dtype=np.uint8)[None, None, ...]  # (1, 1, n, 3)
     masks = masks[..., None]  # (mask_height, mask_width, n, 1)
     colored_mask = np.zeros((mh, mw, 3), dtype=np.uint8)
     for i in range(n):
@@ -104,9 +103,13 @@ def draw_masks(
             colored_mask == 0, masks[:, :, i] * colors[:, :, i], colored_mask
         )
 
-    colored_mask = cv2.resize(colored_mask, (w, h), interpolation=cv2.INTER_AREA)
-    img, alpha, colored_mask = map(np.float16, [img, alpha, colored_mask])
-    img = np.where(colored_mask > 0, img * (1 - alpha), img) + colored_mask * alpha
+    indices = masks.argmax(axis=2, keepdims=True)
+    colored_mask = np.take_along_axis(masks * colors, indices, axis=2)  # (mask_height, mask_width, 1, 3)
+    colored_mask = colored_mask.squeeze() * alpha  # (mask_height, mask_width, 3)
+    colored_mask = cv2.resize(colored_mask, (w, h), interpolation=cv2.INTER_AREA)  # (h, w, 3)
+
+    overall_mask = colored_mask.any(axis=-1, keepdims=True)  # union of the masks (h, w, 1)
+    img = img * (1 - overall_mask * alpha) + colored_mask
 
     return img
 
@@ -184,6 +187,6 @@ def process_masks(
 
     masks = cv2.resize(masks, dsize=(up_w, up_h), interpolation=cv2.INTER_LINEAR)  # (up_h, up_w, n)
     masks = masks[..., None] if len(masks.shape) == 2 else masks
-    masks = crop_mask(masks.astype(np.float16), boxes_scaled)  # (up_h, up_w, n)
+    masks = crop_mask(masks, boxes_scaled)  # (up_h, up_w, n)
 
     return masks > 0.5
