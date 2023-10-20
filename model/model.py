@@ -203,7 +203,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         :param classes: the array of class_ids with shape (n, ), n is number of boxes after nms
         :param confs: the array of confs with shape (n, )
         :param boxes: the array of boxes with shape (n, 4)
-        :param masks: the array on masks with shape (n, h, w)
+        :param masks: the array on masks with shape (mask_height, mask_width, n)
         :param save_path: save/to/file.jpg
         :param hide_conf: hide confidence score from the labels
         :param language: label language
