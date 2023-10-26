@@ -1,12 +1,16 @@
+# cache and env
 .idea
 /.ipynb_checkpoints/
-/.*
-!/.gitignore
 __pycache__/
+/yolo_bot_env/
 *.ipynb
 *.py[cod]
+
+/.*
+!.gitignore
+!.dockerignore
 *.txt
-/yolo_bot_env/
+!requirements.txt
 
 # checkpoints
 *.onnx
