@@ -51,7 +51,9 @@ async def start_command(message: types.Message):
     """Function to handle the start command and request bot language
     :param message: message with user info
     """
-    user_id, language = message.from_user.id, message.from_user.language_code
+    user_id = message.from_user.id
+    language = usr_language.get(message.from_user.id, message.from_user.language_code)
+
     users.add(user_id)
     usr_language[user_id] = language if language in ["en", "ru"] else "en"
 
@@ -60,28 +62,13 @@ async def start_command(message: types.Message):
             "Привет!\nОтправьте боту изображение, и он покажет вам, "
             "какие объекты он увидел на картинке"
         )
-        text_language = "Выберите язык \n\n"
     else:
         text_greeting = (
             "Welcome to the yolo bot!\nSend me an image and "
             "I will display the objects I've found"
         )
-        text_language = "Select your language \n\n"
-
-    usr_model[user_id] = "yolov8n"
 
     await message.answer(text_greeting)
-    keyboard = [
-        [
-            types.InlineKeyboardButton(text="Русский", callback_data="language_ru"),
-            types.InlineKeyboardButton(text="English", callback_data="language_en"),
-        ]
-    ]
-    await message.answer(
-        text_language,
-        parse_mode="markdown",
-        reply_markup=types.InlineKeyboardMarkup(inline_keyboard=keyboard),
-    )
 
 
 @dp.message(Command("help"))
