@@ -2,7 +2,7 @@ import asyncio
 import io
 import logging
 import os
-from collections import Counter
+from collections import Counter, defaultdict
 from functools import wraps
 
 import aiogram
@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 
 users = set()
 usr_language = {}
-usr_model = {}
+usr_model = defaultdict(lambda: "yolov8n")
 
 
 def auth(func):
@@ -30,9 +30,9 @@ def auth(func):
     async def is_user_exists(message: types.Message):
         if message.from_user.id not in users:
             if message.from_user.language_code == "ru":
-                text = "Сначала запустите бота командой\n/start и выберите язык"
+                text = "Сначала запустите бота командой\n/start"
             else:
-                text = "You should /start the bot and select the language"
+                text = "Please /start the bot first"
             await message.answer(text)
         else:
             await func(message)
@@ -72,13 +72,13 @@ async def help_command(message: types.Message):
     """
     if usr_language.get(message.from_user.id, message.from_user.language_code) == "ru":
         text = (
-            "Используйте команду /start для старта бота и выберете язык \n"
+            "Используйте команду /start для запуска бота \n"
             "Команда /settings позволяет сменить язык бота \n"
             "Отправьте боту изображение, и он покажет вам, какие объекты он увидел на картинке"
         )
     else:
         text = (
-            "Please use /start command to start the bot and select the language \n"
+            "Please use /start command to start the bot \n"
             "You can use /settings command to change language \n"
             "Send an image to the bot and it will display the detected objects"
         )
@@ -209,7 +209,9 @@ async def main():
         [
             types.BotCommand(command="start", description="start the bot"),
             types.BotCommand(command="help", description="list of available commands"),
-            types.BotCommand(command="settings", description="set language"),
+            types.BotCommand(
+                command="settings", description="set language preferences"
+            ),
             types.BotCommand(command="model", description="select the model"),
         ]
     )
