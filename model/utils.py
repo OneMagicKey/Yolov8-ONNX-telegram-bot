@@ -84,7 +84,7 @@ def draw_masks(
     Draw masks on the input image.
 
     :param img: image with shape (h, w, 3)
-    :param masks: bool masks with shape (mask_height, mask_width, n), n is number of masks after nms
+    :param masks: masks with shape (mask_height, mask_width, n), n is number of masks after nms
     :param colors: list of BGR color tuples, (n, 3)
     :param alpha: masks weight in the result image, 0 <= alpha <= 1
     :return: input image with the masks
@@ -98,13 +98,9 @@ def draw_masks(
     colors = np.asarray(colors, dtype=np.uint8)[None, None, ...]  # (1, 1, n, 3)
     masks = masks[..., None]  # (mask_height, mask_width, n, 1)
 
-    # subsampling every 5th pixel and sort by mask size,
-    # then reindex to put the smallest objects on the foreground
-    ids = np.argsort(masks[::5, ::5].sum(axis=(0, 1, 3)))
-    masks, colors = masks[..., ids, :], colors[..., ids, :]
-
+    # apply argmax over the mask scores at each pixel
     indices = masks.argmax(axis=2, keepdims=True)
-    colored_mask = np.take_along_axis(masks * colors, indices, axis=2)  # (mask_height, mask_width, 1, 3)
+    colored_mask = np.take_along_axis((masks > 0.5) * colors, indices, axis=2)  # (mask_height, mask_width, 1, 3)
     colored_mask = colored_mask.squeeze() * alpha  # (mask_height, mask_width, 3)
     colored_mask = cv2.resize(colored_mask, (w, h), interpolation=cv2.INTER_AREA)  # (h, w, 3)
 
@@ -189,4 +185,4 @@ def process_masks(
     masks = masks[..., None] if len(masks.shape) == 2 else masks
     masks = crop_mask(masks, boxes_scaled)  # (up_h, up_w, n)
 
-    return masks > 0.5
+    return masks
