@@ -129,7 +129,7 @@ class YoloOnnx(ABC):
         pass
 
     @abstractmethod
-    def __call__(self, img: np.ndarray, raw: bool = False):
+    def __call__(self, img: np.ndarray, raw: bool = False) -> tuple[np.ndarray, ...]:
         pass
 
 
@@ -157,7 +157,7 @@ class YoloOnnxDetection(YoloOnnx):
         :return: rendered image
         """
         result_img = img.copy()
-        for class_id, conf, box in zip(classes, confs, boxes):
+        for class_id, conf, box in zip(classes, confs, boxes.astype(np.uint16)):
             color = self.colors(class_id)
             label = self.labels_name[language][class_id]
 
@@ -176,12 +176,13 @@ class YoloOnnxDetection(YoloOnnx):
         """
         return self.nms(output[0], ratio, pad)
 
-    def __call__(self, img: np.ndarray, raw: bool = False):
+    def __call__(self, img: np.ndarray, raw: bool = False) -> tuple[np.ndarray, ...]:
         img, ratio, pad = letterbox(img, self.input_size)
         raw_outputs = self.forward_pass(img)
-        classes, confs, boxes = self.postprocess(raw_outputs, ratio, pad)
+        if raw:
+            return raw_outputs
 
-        return raw_outputs if raw else (classes, confs, boxes)
+        return self.postprocess(raw_outputs, ratio, pad)
 
 
 class YoloOnnxSegmentation(YoloOnnx):
@@ -211,7 +212,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         """
         result_img = img.copy()
         result_img = draw_masks(result_img, masks, [self.colors(i) for i in classes])
-        for class_id, conf, box in zip(classes, confs, boxes):
+        for class_id, conf, box in zip(classes, confs, boxes.astype(np.uint16)):
             color = self.colors(class_id)
             label = self.labels_name[language][class_id]
 
@@ -235,14 +236,19 @@ class YoloOnnxSegmentation(YoloOnnx):
         """
         output, protos = output
         classes, confs, boxes, masks = self.nms(output, ratio, pad, return_masks=True)
-        masks = process_masks(protos[0], masks, boxes, self.input_size, shape, pad)
+        masks = process_masks(
+            protos[0], masks, boxes, self.input_size, shape, pad, retina_masks
+        )
 
         return classes, confs, boxes, masks
 
-    def __call__(self, img: np.ndarray, raw: bool = False, retina_masks: bool = False) -> tuple[np.ndarray, ...]:
+    def __call__(
+        self, img: np.ndarray, raw: bool = False, retina_masks: bool = False
+    ) -> tuple[np.ndarray, ...]:
         shape = img.shape[:2]  # (h, w)
         img, ratio, pad = letterbox(img, self.input_size)
         raw_outputs = self.forward_pass(img)
-        classes, confs, boxes, masks = self.postprocess(raw_outputs, ratio, pad, shape, retina_masks)
+        if raw:
+            return raw_outputs
 
-        return raw_outputs if raw else (classes, confs, boxes, masks)
+        return self.postprocess(raw_outputs, ratio, pad, shape, retina_masks)
