@@ -228,6 +228,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         ratio: float,
         pad: tuple[float, float],
         shape: tuple[int, int],
+        retina_masks: bool = False,
     ) -> tuple[np.ndarray, ...]:
         """
         Convert raw output to arrays of classes, confidence, boxes and masks.
@@ -238,10 +239,10 @@ class YoloOnnxSegmentation(YoloOnnx):
 
         return classes, confs, boxes, masks
 
-    def __call__(self, img: np.ndarray, raw: bool = False):
+    def __call__(self, img: np.ndarray, raw: bool = False, retina_masks: bool = False) -> tuple[np.ndarray, ...]:
         shape = img.shape[:2]  # (h, w)
         img, ratio, pad = letterbox(img, self.input_size)
         raw_outputs = self.forward_pass(img)
-        classes, confs, boxes, masks = self.postprocess(raw_outputs, ratio, pad, shape)
+        classes, confs, boxes, masks = self.postprocess(raw_outputs, ratio, pad, shape, retina_masks)
 
         return raw_outputs if raw else (classes, confs, boxes, masks)

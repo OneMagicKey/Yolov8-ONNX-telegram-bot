@@ -144,6 +144,7 @@ def process_masks(
     input_size: tuple[int, int],
     original_img_shape: tuple[int, int],
     pad: tuple[float, float],
+    retina_masks: bool = False,
 ) -> np.ndarray:
     # Inspired by https://github.com/ultralytics/yolov5/blob/master/utils/segment/general.py
     """
@@ -155,6 +156,7 @@ def process_masks(
     :param input_size: predefined size of the model input, (model_height, model_width)
     :param original_img_shape: image spatial shape before preprocessing, (h, w)
     :param pad: initial pad for restore masks to original size
+    :param retina_masks: process masks in high resolution, default is False to save memory
     :return: masks with shape (model_height - 2*padh, model_width-2*padw, n)
     """
     # No masks after nms
@@ -176,8 +178,13 @@ def process_masks(
     bottom, right = mh - round(padh + 0.01), mw - round(padw + 0.01)
     masks = masks[:, top:bottom, left:right].transpose(1, 2, 0)
 
-    # upsample masks to shape (model_height - 2*padh, model_width - 2*padw)
-    up_w, up_h = map(round, [(right - left) / gain, (bottom - top) / gain])
+    if retina_masks:
+        # better quality, but higher memory and time consumption.
+        up_h, up_w = original_img_shape
+    else:
+        # upsample masks to shape (model_height - 2*padh, model_width - 2*padw)
+        up_w, up_h = map(round, [(right - left) / gain, (bottom - top) / gain])
+
     boxes_scaled = boxes.copy()
     boxes_scaled = xyxy2new_shape(boxes_scaled, original_img_shape, (up_h, up_w))
 

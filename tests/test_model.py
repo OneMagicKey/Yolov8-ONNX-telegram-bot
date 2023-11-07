@@ -71,6 +71,15 @@ class YoloTestCases(unittest.TestCase):
 
         assert os.path.exists(path_save_to)
 
+    def test_render_retina_segmentation(self):
+        img, yolo = self.img, self.segmentation_model
+        path_save_to = "result_segmentation.jpg"
+
+        classes, confs, boxes, masks = yolo(img, retina_masks=True)
+        yolo.render(img, classes, confs, boxes, masks, save_path=path_save_to)
+
+        assert os.path.exists(path_save_to)
+
     def test_render_detection(self):
         img, yolo = self.img, self.detection_model
         path_save_to = "result_detection.jpg"
