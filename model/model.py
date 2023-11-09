@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict, namedtuple
+from typing import Literal
 
 import cv2
 import numpy as np
@@ -65,7 +66,7 @@ class YoloOnnx(ABC):
         confs: np.ndarray,
         boxes: np.ndarray,
         masks: None | np.ndarray = None,
-        language: str = "en",
+        language: Literal["en", "ru"] = "en",
     ) -> list:
         BoxInfo = namedtuple("BoxInfo", ["class_id", "class_name", "conf", "box"])
         result_list = [
@@ -142,7 +143,8 @@ class YoloOnnxDetection(YoloOnnx):
         boxes: np.ndarray,
         save_path: str | None = None,
         hide_conf: bool = True,
-        language: str = "en",
+        color_scheme: Literal["same", "diff"] = "same",
+        language: Literal["en", "ru"] = "en",
     ) -> np.ndarray:
         """
         Render image with provided boxes and classes.
@@ -201,8 +203,8 @@ class YoloOnnxSegmentation(YoloOnnx):
         masks: np.ndarray,
         save_path: str | None = None,
         hide_conf: bool = True,
-        color_scheme: str = "same",
-        language: str = "en",
+        color_scheme: Literal["same", "diff"] = "same",
+        language: Literal["en", "ru"] = "en",
     ) -> np.ndarray:
         """
         Render image with provided boxes, masks and classes.
