@@ -153,14 +153,20 @@ class YoloOnnxDetection(YoloOnnx):
         :param boxes: the array of boxes with shape (n, 4)
         :param save_path: save/to/file.jpg
         :param hide_conf: hide confidence score from the labels
+        :param color_scheme: the 'same' or 'diff' color for objects of the same class
         :param language: label language
         :return: rendered image
         """
-        result_img = img.copy()
-        for class_id, conf, box in zip(classes, confs, boxes.astype(np.uint16)):
-            color = self.colors(class_id)
-            label = self.labels_name[language][class_id]
+        if color_scheme == "diff":
+            random_color_ids = np.random.randint(self.colors.n, size=len(classes))
+            colors = [self.colors(i) for i in random_color_ids]
+        else:
+            colors = [self.colors(i) for i in classes]
 
+        result_img = img.copy()
+        boxes = boxes.astype(np.uint16)
+        for color, class_id, conf, box in zip(colors, classes, confs, boxes):
+            label = self.labels_name[language][class_id]
             draw_box(result_img, label, color, conf, hide_conf, *box)
 
         if save_path is not None:
@@ -195,6 +201,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         masks: np.ndarray,
         save_path: str | None = None,
         hide_conf: bool = True,
+        color_scheme: str = "same",
         language: str = "en",
     ) -> np.ndarray:
         """
@@ -207,15 +214,21 @@ class YoloOnnxSegmentation(YoloOnnx):
         :param masks: the array on masks with shape (mask_height, mask_width, n)
         :param save_path: save/to/file.jpg
         :param hide_conf: hide confidence score from the labels
+        :param color_scheme: the 'same' or 'diff' color for objects of the same class
         :param language: label language
         :return: rendered image
         """
-        result_img = img.copy()
-        result_img = draw_masks(result_img, masks, [self.colors(i) for i in classes])
-        for class_id, conf, box in zip(classes, confs, boxes.astype(np.uint16)):
-            color = self.colors(class_id)
-            label = self.labels_name[language][class_id]
+        if color_scheme == "diff":
+            random_color_ids = np.random.randint(self.colors.n, size=len(classes))
+            colors = [self.colors(i) for i in random_color_ids]
+        else:
+            colors = [self.colors(i) for i in classes]
 
+        result_img = img.copy()
+        result_img = draw_masks(result_img, masks, colors)
+        boxes = boxes.astype(np.uint16)
+        for color, class_id, conf, box in zip(colors, classes, confs, boxes):
+            label = self.labels_name[language][class_id]
             draw_box(result_img, label, color, conf, hide_conf, *box)
 
         if save_path is not None:
