@@ -308,6 +308,14 @@ async def main():
                 command="settings", description="set language preferences"
             ),
             types.BotCommand(command="model", description="select the model"),
+            types.BotCommand(
+                command="color_scheme",
+                description="select the color scheme for detected objects",
+            ),
+            types.BotCommand(
+                command="retina_masks",
+                description="enable high-quality segmentation masks",
+            ),
         ]
     )
     await dp.start_polling(bot)
