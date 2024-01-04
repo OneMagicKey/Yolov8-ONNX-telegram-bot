@@ -2,7 +2,7 @@ import asyncio
 import io
 import logging
 import os
-from collections import Counter, defaultdict
+from collections import Counter
 from functools import wraps
 
 import aiogram
@@ -12,6 +12,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
 
 from model.model import YoloOnnxDetection, YoloOnnxSegmentation
+from user import User
 
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -20,9 +21,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 logging.basicConfig(level=logging.INFO)
 
-users = set()
-usr_language = {}
-usr_model = defaultdict(lambda: "yolov8n")
+users = {}
 
 
 def auth(func):
@@ -42,16 +41,20 @@ def auth(func):
 
 @dp.message(Command("start"))
 async def start_command(message: types.Message):
-    """Function to handle the start command and request bot language
+    """Function to handle the start command and create new user
     :param message: message with user info
     """
     user_id = message.from_user.id
-    language = usr_language.get(message.from_user.id, message.from_user.language_code)
+    if users.get(user_id) is None:
+        language_code = message.from_user.language_code
+        language = language_code if language_code in ["en", "ru"] else "en"
+    else:
+        language = users[user_id].language
 
-    users.add(user_id)
-    usr_language[user_id] = language if language in ["en", "ru"] else "en"
+    user = User(language)
+    users[user_id] = user
 
-    if usr_language[user_id] == "ru":
+    if user.language == "ru":
         text_greeting = (
             "Привет!\nОтправьте боту изображение, и он покажет вам, "
             "какие объекты он увидел на картинке"
@@ -70,7 +73,10 @@ async def help_command(message: types.Message):
     """Function to handle the help command. Prints a list of available bot commands
     :param message: message with user_id
     """
-    if usr_language.get(message.from_user.id, message.from_user.language_code) == "ru":
+    user = users.get(message.from_user.id)
+    language = user.language if user else message.from_user.language_code
+
+    if language == "ru":
         text = (
             "Используйте команду /start для запуска бота \n"
             "Команда /settings позволяет сменить язык бота \n"
@@ -92,7 +98,7 @@ async def setting_command(message: types.Message):
     """Function to handle the settings command and changing the bot language
     :param message: message with user_id
     """
-    if usr_language[message.from_user.id] == "ru":
+    if users[message.from_user.id].language == "ru":
         text = "Выберите язык \n\n"
     else:
         text = "Select your language \n\n"
@@ -116,8 +122,7 @@ async def model_command(message: types.Message):
     """Function to handle the model command and changing the user's model
     :param message: message with user_id
     """
-    user_id = message.from_user.id
-    if usr_language[user_id] == "ru":
+    if users[message.from_user.id].language == "ru":
         text = "Выберите модель \n\n"
     else:
         text = "Select the model \n\n"
@@ -143,13 +148,22 @@ async def model_forward(img: np.ndarray, user_id: int) -> tuple[np.ndarray, str]
     language, model_name = usr_language[user_id], usr_model[user_id]
     net: YoloOnnxDetection | YoloOnnxSegmentation = models[model_name]
 
-    result = net(img)
-    result_img = net.render(img, *result, hide_conf=False, language=language)
-    result_list = net.print_results(*result, language=language)
+async def model_forward(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
+    net: YoloOnnxDetection | YoloOnnxSegmentation = models[user.model]
+
+    result = net(img, retina_masks=user.retina_masks)
+    result_img = net.render(
+        img,
+        *result,
+        hide_conf=False,
+        language=user.language,
+        color_scheme=user.color_scheme,
+    )
+    result_list = net.print_results(*result, language=user.language)
 
     counter = Counter(info.class_name for info in result_list)
     if not counter:
-        text = "Ничего не нашел" if usr_language[user_id] == "ru" else "No detections"
+        text = "Ничего не нашел" if user.language == "ru" else "No detections"
     else:
         text = "\n".join(f"{count} {name}" for (name, count) in counter.items())
 
@@ -160,13 +174,13 @@ async def model_forward(img: np.ndarray, user_id: int) -> tuple[np.ndarray, str]
 @auth
 async def process_image(message: types.Message):
     """Detect objects on the image from the message"""
-    user_id = message.from_user.id
+    user: User = users[message.from_user.id]
 
     file_io = io.BytesIO()
     await bot.download(message.photo[-1], destination=file_io)
     img = cv2.imdecode(np.frombuffer(file_io.read(), np.uint8), cv2.IMREAD_COLOR)
 
-    result_img, text = await model_forward(img, user_id)
+    result_img, text = await model_forward(img, user)
 
     _, img_encode = cv2.imencode(".jpg", result_img)
     result_img = types.BufferedInputFile(img_encode.tobytes(), "result_img")
@@ -177,13 +191,15 @@ async def process_image(message: types.Message):
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("yolo")))
 async def callback_model(call: types.CallbackQuery):
     """Callback function to handle the model buttons"""
-    model_name = call.data
     user_id = call.from_user.id
-    usr_model[user_id] = model_name
-    if usr_language[user_id] == "ru":
-        text = f"Сохранено!\nИспользуется модель {''.join(model_name.split('_'))}"
+    new_model_name = call.data
+
+    users[user_id].model = new_model_name
+
+    if users[user_id].language == "ru":
+        text = f"Сохранено!\nИспользуется модель {''.join(new_model_name.split('_'))}"
     else:
-        text = f"Saved!\nUsing {''.join(model_name.split('_'))} model"
+        text = f"Saved!\nUsing {''.join(new_model_name.split('_'))} model"
 
     await bot.send_message(user_id, text)
 
@@ -191,13 +207,14 @@ async def callback_model(call: types.CallbackQuery):
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("language")))
 async def callback_language(call: types.CallbackQuery):
     """Callback function to handle the language buttons"""
-    data = call.data.split("_")
+    new_language = call.data.split("_")[1]
     user_id = call.from_user.id
-    if data[1] == "ru":
-        usr_language[user_id] = "ru"
+
+    if new_language == "ru":
+        users[user_id].language = "ru"
         text = "Язык сохранён!"
     else:
-        usr_language[user_id] = "en"
+        users[user_id].language = "en"
         text = "Language has been saved!"
 
     await bot.send_message(user_id, text)
