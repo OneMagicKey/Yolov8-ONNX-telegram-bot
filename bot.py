@@ -170,6 +170,30 @@ async def color_scheme_command(message: types.Message):
     )
 
 
+@dp.message(Command("retina_masks"))
+@auth
+async def retina_masks_command(message: types.Message):
+    """Function to enable high-quality masks for instance segmentation
+    :param message: message with user_id
+    """
+    if users[message.from_user.id].language == "ru":
+        text = "Использовать маски в высоком разрешении при сегментации? \n\n"
+    else:
+        text = "Enable high-quality masks? \n\n"
+
+    keyboard = [
+        [
+            types.InlineKeyboardButton(text="yes", callback_data="retina_on"),
+            types.InlineKeyboardButton(text="no", callback_data="retina_off"),
+        ],
+    ]
+    await message.answer(
+        text,
+        parse_mode="markdown",
+        reply_markup=types.InlineKeyboardMarkup(inline_keyboard=keyboard),
+    )
+
+
 async def model_forward(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
     net: YoloOnnxDetection | YoloOnnxSegmentation = models[user.model]
 
@@ -254,6 +278,24 @@ async def callback_color_scheme(call: types.CallbackQuery):
         text = f"Сохранено!\nИспользуется цветовая схема {new_color_scheme}"
     else:
         text = f"Saved!\nUsing {new_color_scheme} color scheme"
+
+    await bot.send_message(user_id, text)
+
+
+@dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("retina")))
+async def callback_retina_masks(call: types.CallbackQuery):
+    """Callback function to handle the color_scheme buttons"""
+    user_id = call.from_user.id
+    retina_masks_flag = True if call.data.split("_")[1] == "on" else False
+
+    users[user_id].retina_masks = retina_masks_flag
+
+    if users[user_id].language == "ru":
+        mask_text = "высоком разрешении" if retina_masks_flag else "обычном разрешении"
+        text = f"Сохранено!\nИспользуются маски в {mask_text}"
+    else:
+        mask_text = "Retina" if retina_masks_flag else "Default"
+        text = f"Saved!\n{mask_text} masks are used"
 
     await bot.send_message(user_id, text)
 
