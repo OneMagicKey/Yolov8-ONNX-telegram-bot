@@ -98,10 +98,10 @@ async def help_command(message: types.Message):
     await message.answer(text)
 
 
-@dp.message(Command("settings"))
+@dp.message(Command("language"))
 @auth
-async def setting_command(message: types.Message):
-    """Function to handle the settings command and changing the bot language
+async def language_command(message: types.Message):
+    """Function to change the bot language
     :param message: message with user_id
     """
     if users[message.from_user.id].language == "ru":
