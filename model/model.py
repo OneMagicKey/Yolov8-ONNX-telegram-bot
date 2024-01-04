@@ -143,7 +143,7 @@ class YoloOnnxDetection(YoloOnnx):
         boxes: np.ndarray,
         save_path: str | None = None,
         hide_conf: bool = True,
-        color_scheme: Literal["same", "diff"] = "same",
+        color_scheme: Literal["equal", "random"] = "equal",
         language: Literal["en", "ru"] = "en",
     ) -> np.ndarray:
         """
@@ -155,11 +155,11 @@ class YoloOnnxDetection(YoloOnnx):
         :param boxes: the array of boxes with shape (n, 4)
         :param save_path: save/to/file.jpg
         :param hide_conf: hide confidence score from the labels
-        :param color_scheme: the 'same' or 'diff' color for objects of the same class
+        :param color_scheme: the 'equal' or 'random' color for objects of the same class
         :param language: label language
         :return: rendered image
         """
-        if color_scheme == "diff":
+        if color_scheme == "random":
             random_color_ids = np.random.randint(self.colors.n, size=len(classes))
             colors = [self.colors(i) for i in random_color_ids]
         else:
@@ -184,7 +184,9 @@ class YoloOnnxDetection(YoloOnnx):
         """
         return self.nms(output[0], ratio, pad)
 
-    def __call__(self, img: np.ndarray, raw: bool = False) -> tuple[np.ndarray, ...]:
+    def __call__(
+        self, img: np.ndarray, raw: bool = False, **kwargs
+    ) -> tuple[np.ndarray, ...]:
         img, ratio, pad = letterbox(img, self.input_size)
         raw_outputs = self.forward_pass(img)
         if raw:
@@ -203,7 +205,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         masks: np.ndarray,
         save_path: str | None = None,
         hide_conf: bool = True,
-        color_scheme: Literal["same", "diff"] = "same",
+        color_scheme: Literal["equal", "random"] = "equal",
         language: Literal["en", "ru"] = "en",
     ) -> np.ndarray:
         """
@@ -216,11 +218,11 @@ class YoloOnnxSegmentation(YoloOnnx):
         :param masks: the array on masks with shape (mask_height, mask_width, n)
         :param save_path: save/to/file.jpg
         :param hide_conf: hide confidence score from the labels
-        :param color_scheme: the 'same' or 'diff' color for objects of the same class
+        :param color_scheme: the 'equal' or 'random' color for objects of the same class
         :param language: label language
         :return: rendered image
         """
-        if color_scheme == "diff":
+        if color_scheme == "random":
             random_color_ids = np.random.randint(self.colors.n, size=len(classes))
             colors = [self.colors(i) for i in random_color_ids]
         else:

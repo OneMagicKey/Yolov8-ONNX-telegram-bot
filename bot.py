@@ -146,9 +146,29 @@ async def model_command(message: types.Message):
     )
 
 
-async def model_forward(img: np.ndarray, user_id: int) -> tuple[np.ndarray, str]:
-    language, model_name = usr_language[user_id], usr_model[user_id]
-    net: YoloOnnxDetection | YoloOnnxSegmentation = models[model_name]
+@dp.message(Command("color_scheme"))
+@auth
+async def color_scheme_command(message: types.Message):
+    """Function to change a colour scheme for detected objects
+    :param message: message with user_id
+    """
+    if users[message.from_user.id].language == "ru":
+        text = "Выберите цветовую схему \n\n"
+    else:
+        text = "Select the color scheme \n\n"
+
+    keyboard = [
+        [
+            types.InlineKeyboardButton(text="equal", callback_data="color_equal"),
+            types.InlineKeyboardButton(text="random", callback_data="color_random"),
+        ],
+    ]
+    await message.answer(
+        text,
+        parse_mode="markdown",
+        reply_markup=types.InlineKeyboardMarkup(inline_keyboard=keyboard),
+    )
+
 
 async def model_forward(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
     net: YoloOnnxDetection | YoloOnnxSegmentation = models[user.model]
@@ -218,6 +238,22 @@ async def callback_language(call: types.CallbackQuery):
     else:
         users[user_id].language = "en"
         text = "Language has been saved!"
+
+    await bot.send_message(user_id, text)
+
+
+@dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("color")))
+async def callback_color_scheme(call: types.CallbackQuery):
+    """Callback function to handle the color_scheme buttons"""
+    user_id = call.from_user.id
+    new_color_scheme = call.data.split("_")[1]
+
+    users[user_id].color_scheme = new_color_scheme
+
+    if users[user_id].language == "ru":
+        text = f"Сохранено!\nИспользуется цветовая схема {new_color_scheme}"
+    else:
+        text = f"Saved!\nUsing {new_color_scheme} color scheme"
 
     await bot.send_message(user_id, text)
 
