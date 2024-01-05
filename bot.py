@@ -250,7 +250,7 @@ async def callback_model(call: types.CallbackQuery):
     if users[user_id].language == "ru":
         text = f"Сохранено!\nИспользуется модель {''.join(new_model_name.split('_'))}"
     else:
-        text = f"Saved!\nUsing {''.join(new_model_name.split('_'))} model"
+        text = f"Saved!\nThe {''.join(new_model_name.split('_'))} model is used"
 
     await bot.send_message(user_id, text)
 
@@ -282,7 +282,7 @@ async def callback_color_scheme(call: types.CallbackQuery):
     if users[user_id].language == "ru":
         text = f"Сохранено!\nИспользуется цветовая схема {new_color_scheme}"
     else:
-        text = f"Saved!\nUsing {new_color_scheme} color scheme"
+        text = f"Saved!\nThe {new_color_scheme} color scheme is used"
 
     await bot.send_message(user_id, text)
 
