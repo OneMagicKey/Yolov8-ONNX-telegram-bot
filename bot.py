@@ -21,7 +21,7 @@ WEBHOOK_PATH = f"/bot/{TOKEN}"
 WEBHOOK_URL = os.getenv("RENDER_EXTERNAL_URL") + WEBHOOK_PATH
 
 WEBAPP_HOST = "0.0.0.0"
-WEBAPP_PORT = os.getenv("PORT", default=8000)
+WEBAPP_PORT = os.getenv("PORT", default=10000)
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -330,7 +330,7 @@ def main():
     setup_application(app, dp, bot=bot)
 
     # And finally start webserver
-    web.run_app(app, host=WEBAPP_HOST, port=WEBAPP_PORT)
+    web.run_app(app, host=WEBAPP_HOST, port=int(WEBAPP_PORT))
 
 
 if __name__ == "__main__":
