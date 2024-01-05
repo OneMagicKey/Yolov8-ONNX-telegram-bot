@@ -78,15 +78,20 @@ async def help_command(message: types.Message):
 
     if language == "ru":
         text = (
-            "Используйте команду /start для запуска бота \n"
-            "Команда /settings позволяет сменить язык бота \n"
-            "Отправьте боту изображение, и он покажет вам, какие объекты он увидел на картинке"
+            "Используйте команду /start для запуска бота\n"
+            "\nКоманда /language позволяет выбрать язык бота, команда /model изменяет "
+            "архитектуру модели. С помощью команды /color_scheme можно изменять "
+            "цветовую схему найденных объектов\n"
+            "\nОтправьте боту изображение, и он покажет вам, какие объекты он увидел "
+            "на картинке"
         )
     else:
         text = (
-            "Please use /start command to start the bot \n"
-            "You can use /settings command to change language \n"
-            "Send an image to the bot and it will display the detected objects"
+            "Please use /start command to start the bot\n"
+            "\nUse the /language command to set the language preferences and the "
+            "/model command to select the architecture of the model. The /color_scheme "
+            "command allows you to change the colour scheme of detected objects\n"
+            "\nSend an image to the bot and it will display the detected objects"
         )
 
     await message.answer(text)
