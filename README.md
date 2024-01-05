@@ -29,6 +29,9 @@ Telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8 
 3) Add `TELEGRAM_TOKEN` provided by BotFather to the render environment
 4) Deploy the app
 
+## Example
+<img width="768" src="images/example.png">
+
 ## Reference
 
 1) [Ultralytics](https://github.com/ultralytics/ultralytics)
