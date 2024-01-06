@@ -5,7 +5,8 @@
 <img src ="https://img.shields.io/github/repo-size/OneMagicKey/Yolov8-ONNX-telegram-bot">
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
-Telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8 implemented on python + openCV DNN + ONNX.
+
+[Telegram bot](https://t.me/yolov8_onnx_bot) for object detection and instance segmentation using YOLOv5/YOLOv8 implemented on python + openCV DNN + ONNX.
 
 - [x] ENG / RU languages
 - [x] Object Detection / Instance Segmentation
