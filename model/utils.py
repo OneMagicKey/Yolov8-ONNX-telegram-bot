@@ -68,9 +68,16 @@ def draw_box(
     lt, ff = cv2.LINE_AA, cv2.FONT_HERSHEY_COMPLEX  # lineType, fontFace
     w, h = cv2.getTextSize(label, ff, fs, th)[0]
 
-    cv2.rectangle(img, (x1 - th, y1 - th), (x1 + w - th, y1 - h - th), color, -1, lt)
+    # Draw bounding box
     cv2.rectangle(img, (x1, y1), (x2, y2), color, th, lt)
-    cv2.putText(img, label, (x1 - th, y1 - th), ff, fs, (255, 255, 255), th, lt)
+
+    # Draw label
+    outside = y1 - th - h < 0
+    text_up = y1 + h if outside else y1 - th  # top border of the text
+    text_bg = (y1 + th + h if outside else y1 - th - h)  # top border of the text background
+
+    cv2.rectangle(img, (x1 - th, y1 - th), (x1 - th + w, text_bg), color, -1, lt)
+    cv2.putText(img, label, (x1 - th, text_up), ff, fs, (255, 255, 255), th, lt)
 
 
 def draw_masks(
