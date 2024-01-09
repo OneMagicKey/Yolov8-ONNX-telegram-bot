@@ -67,12 +67,13 @@ class YoloOnnx(ABC):
         boxes: np.ndarray,
         masks: None | np.ndarray = None,
         language: Literal["en", "ru"] = "en",
-    ) -> list:
+    ):
         BoxInfo = namedtuple("BoxInfo", ["class_id", "class_name", "conf", "box"])
         result_list = [
             BoxInfo(class_id, self.labels_name[language][class_id], conf, box)
             for class_id, conf, box in zip(classes, confs, boxes)
         ]
+
         return result_list
 
     def version_handler(self, output: np.ndarray, nc: int) -> tuple[np.ndarray, int]:
@@ -93,6 +94,24 @@ class YoloOnnx(ABC):
             output[..., probs_start_idx : probs_start_idx + nc] *= output[..., 4:5]  # conf = obj_conf * cls_conf
 
         return output, probs_start_idx
+
+    def get_colors(
+        self, classes: np.ndarray, color_scheme: Literal["equal", "random"] = "equal"
+    ) -> list[tuple[int, int, int]]:
+        """
+        Create a list of colors to color bounding boxes and masks.
+        :param classes: the array of class labels with shape (n, )
+        :param color_scheme: the 'equal' or 'random' color for objects of the same class
+        :return: list of colors with length n
+        """
+        if color_scheme == "random":
+            colors_ids = np.random.randint(self.colors.n, size=len(classes))
+        else:
+            colors_ids = classes
+
+        colors = [self.colors(i) for i in colors_ids]
+
+        return colors
 
     def nms(
         self,
@@ -159,14 +178,10 @@ class YoloOnnxDetection(YoloOnnx):
         :param language: label language
         :return: rendered image
         """
-        if color_scheme == "random":
-            random_color_ids = np.random.randint(self.colors.n, size=len(classes))
-            colors = [self.colors(i) for i in random_color_ids]
-        else:
-            colors = [self.colors(i) for i in classes]
-
         result_img = img.copy()
         boxes = boxes.astype(np.uint16)
+        colors = self.get_colors(classes, color_scheme)
+
         for color, class_id, conf, box in zip(colors, classes, confs, boxes):
             label = self.labels_name[language][class_id]
             draw_box(result_img, label, color, conf, hide_conf, *box)
@@ -180,7 +195,7 @@ class YoloOnnxDetection(YoloOnnx):
         self, output: tuple[np.ndarray], ratio: float, pad: tuple[float, float]
     ) -> tuple[np.ndarray, ...]:
         """
-        Convert raw output to arrays of classes, confidence and boxes.
+        Convert raw output to arrays of classes, confidences and boxes.
         """
         return self.nms(output[0], ratio, pad)
 
@@ -222,15 +237,12 @@ class YoloOnnxSegmentation(YoloOnnx):
         :param language: label language
         :return: rendered image
         """
-        if color_scheme == "random":
-            random_color_ids = np.random.randint(self.colors.n, size=len(classes))
-            colors = [self.colors(i) for i in random_color_ids]
-        else:
-            colors = [self.colors(i) for i in classes]
-
         result_img = img.copy()
-        result_img = draw_masks(result_img, masks, colors)
         boxes = boxes.astype(np.uint16)
+        colors = self.get_colors(classes, color_scheme)
+
+        result_img = draw_masks(result_img, masks, colors)
+
         for color, class_id, conf, box in zip(colors, classes, confs, boxes):
             label = self.labels_name[language][class_id]
             draw_box(result_img, label, color, conf, hide_conf, *box)
@@ -249,7 +261,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         retina_masks: bool = False,
     ) -> tuple[np.ndarray, ...]:
         """
-        Convert raw output to arrays of classes, confidence, boxes and masks.
+        Convert raw output to arrays of classes, confidences, boxes and masks.
         """
         output, protos = output
         classes, confs, boxes, masks = self.nms(output, ratio, pad, return_masks=True)
