@@ -19,5 +19,6 @@ __pycache__/
 
 # example images
 *.jpg
+*.png
 !images/bus.jpg
 !images/zidane.jpg

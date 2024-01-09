@@ -18,6 +18,7 @@ Dockerfile
 
 # example images
 **/*.jpg
+**/*.png
 !images/bus.jpg
 
 # tests
