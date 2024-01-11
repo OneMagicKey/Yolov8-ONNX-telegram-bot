@@ -55,10 +55,10 @@ def draw_box(
     color: tuple[int, int, int],
     confidence: float,
     hide_conf: bool,
-    x1: int,
-    y1: int,
-    x2: int,
-    y2: int,
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
 ) -> None:
     """
     Draw bounding box and label on the input image.
@@ -67,6 +67,7 @@ def draw_box(
     th, fs = 2, 0.65  # thickness, fontScale
     lt, ff = cv2.LINE_AA, cv2.FONT_HERSHEY_COMPLEX  # lineType, fontFace
     w, h = cv2.getTextSize(label, ff, fs, th)[0]
+    x1, x2, y1, y2 = map(np.int32, (x1, x2, y1, y2))
 
     # Draw bounding box
     cv2.rectangle(img, (x1, y1), (x2, y2), color, th, lt)

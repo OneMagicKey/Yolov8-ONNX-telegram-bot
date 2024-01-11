@@ -179,7 +179,6 @@ class YoloOnnxDetection(YoloOnnx):
         :return: rendered image
         """
         result_img = img.copy()
-        boxes = boxes.astype(np.uint16)
         colors = self.get_colors(classes, color_scheme)
 
         for color, class_id, conf, box in zip(colors, classes, confs, boxes):
@@ -238,7 +237,6 @@ class YoloOnnxSegmentation(YoloOnnx):
         :return: rendered image
         """
         result_img = img.copy()
-        boxes = boxes.astype(np.uint16)
         colors = self.get_colors(classes, color_scheme)
 
         result_img = draw_masks(result_img, masks, colors)
