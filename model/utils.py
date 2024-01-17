@@ -175,7 +175,7 @@ def process_masks(
     def sigmoid(x: np.ndarray) -> np.ndarray:
         return 1.0 / (1.0 + np.exp(-x))
 
-    masks = sigmoid(masks_in @ protos.reshape(c, -1)).reshape(-1, mh, mw)  # (n, mh, mw)
+    masks = sigmoid(np.einsum("nc,chw->nhw", masks_in, protos))  # (n, mh, mw)
 
     gain = min(mh / input_size[0], mw / input_size[1])  # 0.25 predefined by yolo
     padw, padh = pad[0] * gain, pad[1] * gain
