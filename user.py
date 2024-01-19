@@ -6,5 +6,5 @@ from typing import Literal
 class User:
     language: Literal["en", "ru"] = "en"
     model: str = "yolov8n"
-    color_scheme: Literal["equal", "random"] = "same"
+    color_scheme: Literal["equal", "random"] = "equal"
     retina_masks: bool = False
