@@ -381,9 +381,9 @@ if __name__ == "__main__":
     models = {
         model_name: model_types[model_type](
             checkpoint=f"checkpoints/{model_type}/{model_name}.onnx",
-            input_size=(640, 640),
+            input_size=model_input_size,
         )
-        for model_type, model_name in model_list
+        for model_type, model_name, model_input_size in model_list
     }
     # Warmup
     test_img = cv2.imread("images/bus.jpg", cv2.IMREAD_COLOR)
