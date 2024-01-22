@@ -31,6 +31,12 @@ users = {}
 
 
 def auth(func):
+    """
+    Authentication decorator.
+
+    Users must /start the bot before they can use it.
+    """
+
     @wraps(func)
     async def is_user_exists(message: types.Message):
         if message.from_user.id not in users:
@@ -47,8 +53,10 @@ def auth(func):
 
 @dp.message(Command("start"))
 async def start_command(message: types.Message):
-    """Function to handle the start command and create new user
-    :param message: message with user info
+    """
+    Function to handle the start command and create a new user.
+
+    :param message: user message
     """
     user_id = message.from_user.id
     if users.get(user_id) is None:
@@ -76,8 +84,10 @@ async def start_command(message: types.Message):
 
 @dp.message(Command("help"))
 async def help_command(message: types.Message):
-    """Function to handle the help command. Prints a list of available bot commands
-    :param message: message with user_id
+    """
+    Function to handle the help command. Prints a list of available bot commands.
+
+    :param message: user message
     """
     user = users.get(message.from_user.id)
     language = user.language if user else message.from_user.language_code
@@ -106,8 +116,10 @@ async def help_command(message: types.Message):
 @dp.message(Command("language"))
 @auth
 async def language_command(message: types.Message):
-    """Function to change the bot language
-    :param message: message with user_id
+    """
+    Function to change the bot language.
+
+    :param message: user message
     """
     if users[message.from_user.id].language == "ru":
         text = "Выберите язык \n\n"
@@ -130,8 +142,10 @@ async def language_command(message: types.Message):
 @dp.message(Command("model"))
 @auth
 async def model_command(message: types.Message):
-    """Function to handle the model command and changing the user's model
-    :param message: message with user_id
+    """
+    Function to handle the model command and changing the user's model.
+
+    :param message: user message
     """
     if users[message.from_user.id].language == "ru":
         text = "Выберите модель \n\n"
@@ -154,8 +168,10 @@ async def model_command(message: types.Message):
 @dp.message(Command("color_scheme"))
 @auth
 async def color_scheme_command(message: types.Message):
-    """Function to change a colour scheme for detected objects
-    :param message: message with user_id
+    """
+    Function to change a colour scheme for detected objects.
+
+    :param message: user message
     """
     if users[message.from_user.id].language == "ru":
         text = "Выберите цветовую схему \n\n"
@@ -178,8 +194,10 @@ async def color_scheme_command(message: types.Message):
 @dp.message(Command("retina_masks"))
 @auth
 async def retina_masks_command(message: types.Message):
-    """Function to enable high-quality masks for instance segmentation
-    :param message: message with user_id
+    """
+    Function to enable high-quality masks for instance segmentation.
+
+    :param message: user message
     """
     if users[message.from_user.id].language == "ru":
         text = "Использовать маски в высоком разрешении при сегментации? \n\n"
@@ -200,6 +218,13 @@ async def retina_masks_command(message: types.Message):
 
 
 async def model_forward(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
+    """
+    Perform a forward pass through the model and render the resulting image
+
+    :param img: image from the user's message
+    :param user: user parameters
+    :return: input image with bounding boxes and (optional) masks drawn on top
+    """
     net: YoloOnnxDetection | YoloOnnxSegmentation = models[user.model]
 
     result = net(img, retina_masks=user.retina_masks)
@@ -224,7 +249,11 @@ async def model_forward(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
 @dp.message(aiogram.F.photo)
 @auth
 async def process_image(message: types.Message):
-    """Detect objects on the image from the message"""
+    """
+    Detect objects in the image from the message.
+
+    :param message: user message with attached image
+    """
     user: User = users[message.from_user.id]
 
     file_io = io.BytesIO()
@@ -241,7 +270,9 @@ async def process_image(message: types.Message):
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("yolo")))
 async def callback_model(call: types.CallbackQuery):
-    """Callback function to handle the model buttons"""
+    """
+    Callback function to handle the model buttons.
+    """
     user_id = call.from_user.id
     new_model_name = call.data
 
@@ -257,7 +288,9 @@ async def callback_model(call: types.CallbackQuery):
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("language")))
 async def callback_language(call: types.CallbackQuery):
-    """Callback function to handle the language buttons"""
+    """
+    Callback function to handle the language buttons.
+    """
     new_language = call.data.split("_")[1]
     user_id = call.from_user.id
 
@@ -273,7 +306,9 @@ async def callback_language(call: types.CallbackQuery):
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("color")))
 async def callback_color_scheme(call: types.CallbackQuery):
-    """Callback function to handle the color_scheme buttons"""
+    """
+    Callback function to handle the color_scheme buttons.
+    """
     user_id = call.from_user.id
     new_color_scheme = call.data.split("_")[1]
 
@@ -289,7 +324,9 @@ async def callback_color_scheme(call: types.CallbackQuery):
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("retina")))
 async def callback_retina_masks(call: types.CallbackQuery):
-    """Callback function to handle the color_scheme buttons"""
+    """
+    Callback function to handle the retina_masks buttons.
+    """
     user_id = call.from_user.id
     retina_masks_flag = True if call.data.split("_")[1] == "on" else False
 
