@@ -151,7 +151,7 @@ def letterbox(
 
 def process_masks(
     protos: np.ndarray,
-    masks_in: np.ndarray,
+    mask_coefs: np.ndarray,
     boxes: np.ndarray,
     input_size: tuple[int, int],
     original_img_shape: tuple[int, int],
@@ -172,7 +172,7 @@ def process_masks(
     :return: masks with shape (model_height - 2*padh, model_width-2*padw, n)
     """
     # No masks after nms
-    if not masks_in.shape[0]:
+    if not mask_coefs.shape[0]:
         return np.zeros((*original_img_shape, 0), dtype=bool)
 
     c, mh, mw = protos.shape
@@ -180,7 +180,7 @@ def process_masks(
     def sigmoid(x: np.ndarray) -> np.ndarray:
         return 1.0 / (1.0 + np.exp(-x))
 
-    masks = sigmoid(np.einsum("nc,chw->nhw", masks_in, protos))  # (n, mh, mw)
+    masks = sigmoid(np.einsum("nc,chw->nhw", mask_coefs, protos))  # (n, mh, mw)
 
     gain = min(mh / input_size[0], mw / input_size[1])  # 0.25 predefined by yolo
     padw, padh = pad[0] * gain, pad[1] * gain

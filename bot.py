@@ -277,9 +277,9 @@ async def callback_model(call: types.CallbackQuery):
     users[user_id].model = new_model_name
 
     if users[user_id].language == "ru":
-        text = f"Сохранено!\nИспользуется модель {''.join(new_model_name.split('_'))}"
+        text = f"Сохранено!\nИспользуется модель {new_model_name}"
     else:
-        text = f"Saved!\nThe {''.join(new_model_name.split('_'))} model is used"
+        text = f"Saved!\nThe {new_model_name} model is used"
 
     await bot.send_message(user_id, text)
 

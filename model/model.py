@@ -54,7 +54,7 @@ class YoloOnnx(ABC):
         :param img: np.array of shape (h, w, 3)
         :return: (boxes_array) or (boxes_and_masks_array, protos_array)
         """
-        (w, h) = self.input_size[::-1]
+        (h, w) = self.input_size
         blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (w, h), swapRB=True, crop=False)  # bs, c, h, w
         self.model.setInput(blob)
 
@@ -273,9 +273,11 @@ class YoloOnnxSegmentation(YoloOnnx):
         Convert raw output to arrays of classes, confidences, boxes and masks.
         """
         output, protos = output
-        classes, confs, boxes, masks = self.nms(output, ratio, pad, return_masks=True)
+        classes, confs, boxes, mask_coefs = self.nms(
+            output, ratio, pad, return_masks=True
+        )
         masks = process_masks(
-            protos[0], masks, boxes, self.input_size, shape, pad, retina_masks
+            protos[0], mask_coefs, boxes, self.input_size, shape, pad, retina_masks
         )
 
         return classes, confs, boxes, masks
