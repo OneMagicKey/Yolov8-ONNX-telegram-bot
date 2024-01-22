@@ -36,6 +36,9 @@ class YoloOnnx(ABC):
         )
 
     def build_model(self, checkpoint: str) -> cv2.dnn.Net:
+        """
+        Create a model from the provided ONNX checkpoint.
+        """
         model = cv2.dnn.readNetFromONNX(checkpoint)
         model.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         model.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
@@ -46,7 +49,7 @@ class YoloOnnx(ABC):
         self, img: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray]:
         """
-        Create a blob from an image and propagate it through the model.
+        Create a blob from the image and pass it through the model.
 
         :param img: np.array of shape (h, w, 3)
         :return: (boxes_array) or (boxes_and_masks_array, protos_array)
@@ -68,6 +71,11 @@ class YoloOnnx(ABC):
         masks: None | np.ndarray = None,
         language: Literal["en", "ru"] = "en",
     ):
+        """
+        Create a list of tuples containing information about detected objects.
+
+        :return: list of tuples BoxInfo("class_id", "class_name", "conf", and "box")
+        """
         BoxInfo = namedtuple("BoxInfo", ["class_id", "class_name", "conf", "box"])
         result_list = [
             BoxInfo(class_id, self.labels_name[language][class_id], conf, box)
@@ -78,7 +86,7 @@ class YoloOnnx(ABC):
 
     def version_handler(self, output: np.ndarray, nc: int) -> tuple[np.ndarray, int]:
         """
-        Convert output to the predefined format.
+        Convert output of the model to the predefined format.
 
         :param output: an array with boxes from the model's output
         :param nc: number of classes
@@ -100,6 +108,7 @@ class YoloOnnx(ABC):
     ) -> list[tuple[int, int, int]]:
         """
         Create a list of colors to color bounding boxes and masks.
+
         :param classes: the array of class labels with shape (n, )
         :param color_scheme: the 'equal' or 'random' color for objects of the same class
         :return: list of colors with length n
@@ -121,7 +130,9 @@ class YoloOnnx(ABC):
         return_masks: bool = False,
     ) -> tuple[np.ndarray, ...]:
         """
-        Perform non-maximum suppression on the given boxes array.
+        Apply non-maximum suppression to the output of the model.
+
+        :return: classes, confidences, boxes and (optional) mask coefficients
         """
         nc = len(self.labels_name["en"])
         output, probs_id = self.version_handler(output, nc)

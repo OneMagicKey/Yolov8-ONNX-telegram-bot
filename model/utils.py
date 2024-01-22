@@ -3,7 +3,9 @@ import numpy as np
 
 
 def xywh2box(boxes: np.ndarray, scale: float, padw: float, padh: float) -> np.ndarray:
-    """Convert (x,y,w,h) to (x,y,w,h) in original image size"""
+    """
+    Convert (x,y,w,h) to (x,y,w,h) in original image size.
+    """
     boxes[..., [0, 1]] -= 0.5 * boxes[..., [2, 3]]
     boxes[..., [0, 1]] -= np.array([padw, padh])
     boxes /= scale
@@ -12,14 +14,18 @@ def xywh2box(boxes: np.ndarray, scale: float, padw: float, padh: float) -> np.nd
 
 
 def xywh2xyxy(boxes: np.ndarray) -> np.ndarray:
-    """Convert (x,y,w,h) to (x1,y1,x2,y2)"""
+    """
+    Convert (x,y,w,h) to (x1,y1,x2,y2).
+    """
     boxes[..., [2, 3]] += boxes[..., [0, 1]]
 
     return boxes
 
 
 def xyxy2new_shape(boxes: np.ndarray, old_shape, new_shape) -> np.ndarray:
-    """Convert box coords (x1,y1,x2,y2) to the new shape"""
+    """
+    Convert boxes coordinates (x1,y1,x2,y2) to the new shape.
+    """
     h_old, w_old = old_shape
     h_new, w_new = new_shape
 
@@ -39,7 +45,6 @@ def crop_mask(masks: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     :param boxes: should be a size (n, 4) array of bbox coords in relative point form
     :return: cropped masks (h, w, n)
     """
-
     h, w, n = masks.shape
     x1, y1, x2, y2 = np.split(boxes.transpose()[None, ...], 4, 1)  # x1 shape(1, 1, n)
 
@@ -88,13 +93,13 @@ def draw_masks(
     alpha: float = 0.4,
 ) -> np.ndarray:
     """
-    Draw masks on the input image.
+    Draw masks on top of the input image.
 
     :param img: image with shape (h, w, 3)
     :param masks: masks with shape (mask_height, mask_width, n), n is number of masks after nms
     :param colors: list of BGR color tuples, (n, 3)
     :param alpha: masks weight in the result image, 0 <= alpha <= 1
-    :return: input image with the masks
+    :return: input image with masks drawn on top
     """
     # No masks after nms
     if not masks.shape[-1]:
@@ -125,7 +130,7 @@ def letterbox(
 
     :param img: image of shape (h, w, 3)
     :param input_size: predefined size of the model input, (model_height, model_width)
-    :return: resized image of shape (model_height, model_width, 3)
+    :return: resized image of shape (model_height, model_width, 3), scale and pad params
     """
     height, width, _ = img.shape
 
@@ -155,10 +160,10 @@ def process_masks(
 ) -> np.ndarray:
     # Inspired by https://github.com/ultralytics/yolov5/blob/master/utils/segment/general.py
     """
-    Create image masks from output masks and protos.
+    Combine mask_coefficients and protos to create masks.
 
     :param protos: protos, (mask_dim, mask_height, mask_width)
-    :param masks_in: (n, mask_dim), n is number of masks after nms
+    :param mask_coefs: (n, mask_dim), n is number of masks after nms
     :param boxes: boxes with shape (n, 4)
     :param input_size: predefined size of the model input, (model_height, model_width)
     :param original_img_shape: image spatial shape before preprocessing, (h, w)
