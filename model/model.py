@@ -23,11 +23,12 @@ class YoloOnnx(ABC):
         input_size: tuple[int, int] = (640, 640),
         conf: float = 0.25,
         iou: float = 0.45,
+        version: Literal[5, 8] = 8
     ) -> None:
         self.input_size = input_size  # (h, w)
         self.conf = conf
         self.iou = iou
-        self.version = int(checkpoint.split("/yolov")[1][0])
+        self.version = version
         self.model = self.build_model(checkpoint)
 
         self.colors = Colors()
