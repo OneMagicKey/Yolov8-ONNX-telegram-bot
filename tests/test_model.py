@@ -21,13 +21,13 @@ class YoloTestCases(unittest.TestCase):
 
     @staticmethod
     def load_detection_model(path: str = "../checkpoints/detection/yolov8n.onnx"):
-        return YoloOnnxDetection(path, input_size=(640, 640))
+        return YoloOnnxDetection(path, input_size=(640, 640), version=8)
 
     @staticmethod
     def load_segmentation_model(
         path: str = "../checkpoints/segmentation/yolov8n-seg.onnx",
     ):
-        return YoloOnnxSegmentation(path, input_size=(640, 640))
+        return YoloOnnxSegmentation(path, input_size=(640, 640), version=8)
 
     @staticmethod
     def load_img(path: str = "../images/zidane.jpg"):
