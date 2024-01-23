@@ -17,6 +17,16 @@ from model.utils import (
 
 
 class YoloOnnx(ABC):
+    __slots__ = (
+        "input_size",
+        "conf",
+        "iou",
+        "version",
+        "model",
+        "colors",
+        "labels_name",
+    )
+
     def __init__(
         self,
         checkpoint: str,
@@ -166,6 +176,8 @@ class YoloOnnx(ABC):
 
 
 class YoloOnnxDetection(YoloOnnx):
+    __slots__ = ()
+
     def render(
         self,
         img: np.ndarray,
@@ -222,6 +234,8 @@ class YoloOnnxDetection(YoloOnnx):
 
 
 class YoloOnnxSegmentation(YoloOnnx):
+    __slots__ = ()
+
     def render(
         self,
         img: np.ndarray,
