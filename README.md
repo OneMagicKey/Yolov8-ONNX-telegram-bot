@@ -8,9 +8,11 @@
 
 <img width="768" src="images/example.png">
 
-Telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8 implemented on python + openCV DNN + ONNX.
+A telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8, 
+implemented in python + openCV DNN + ONNX.
 
-Additionally, the bot can be deployed on a [Render](https://render.com) cloud platform for free.
+Additionally, the bot can be deployed on the [Render](https://render.com) cloud platform 
+for free.
 
 The webhook version of the running bot requires around 430MB of RAM and includes 2 
 models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yolov5n`, 
@@ -20,26 +22,26 @@ models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yo
 
 - [x] ENG / RU languages
 - [x] Object Detection / Instance Segmentation
-- [x] Support webhooks to deploy as webservice ([webhooks-render](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/webhooks-render/) branch)
+- [x] Support webhooks to deploy as a webservice on the Render platform ([webhooks-render](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/webhooks-render/) branch)
 - [x] Support pooling to run bot locally ([master](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/master/) branch)
 
 
-## Run bot locally
-1) Create telegram bot with [BotFather](https://telegram.me/BotFather)
+## Run the bot on your local machine (pooling version)
+1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
 2) Clone the repo and install all the dependencies:
 ```
 git clone https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot.git
 cd Yolov8-ONNX-telegram-bot
 pip install -r requirements.txt 
 ```
-3) Add `TELEGRAM_TOKEN` provided by BotFather to the python environment
+3) Add the `TELEGRAM_TOKEN` provided by BotFather to the python environment
 4) Run `bot.py`
 
-## Deploy on [Render](https://render.com)
-1) Create telegram bot with [BotFather](https://telegram.me/BotFather)
-2) Create Render account
+## Deploy on the [Render](https://render.com) cloud platform (webhooks version)
+1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
+2) Create a Render account
 3) Go to `New` -> `Web Service` -> `Build and deploy from a Git repository`
-4) Build web service with the following options:
+4) Build a webservice with the following options:
    * Public Git repository - `https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot`
    * Branch - `webhooks-render`
    * Runtime - `Python 3`
