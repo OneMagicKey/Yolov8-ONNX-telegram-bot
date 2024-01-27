@@ -60,6 +60,47 @@ Instances under the Render free plan will spin down after a period of inactivity
 which is typically around 15 minutes. To prevent this, configure [cron-job](https://cron-job.org/) 
 to send a POST request to the bot every 10 minutes, keeping it running permanently.
 
+## Addition of new models
+
+To add `n/s/m/l/x` versions of Yolo to the bot or to adjust the model's image input size, 
+follow these steps:
+
+1) Export a model to ONNX format:
+
+   ```bash
+   !pip install ultralytics
+   ```
+   
+   ```python
+   from ultralytics import YOLO
+   
+   # Load a model
+   model_name = 'yolov8s'  # [yolov8s, yolov8m, yolov8s-seg, yolov8m-seg, ...]
+   model = YOLO(f"{model_name}.pt") 
+   
+   # Image size
+   height, width = (640, 640)  # [(640, 480), (480, 640), ...]
+   
+   # Export the model
+   model.export(format='onnx', opset=12, simplify=True, optimize=True, imgsz=(height, width))
+   ```
+
+2) Place the resulting `.onnx` file in the `checkpoints/detection` or `checkpoints/segmentation` 
+   folder, depending on the model type
+3) Modify `bot.py`:
+   * Add the model to the `model_list` in the following format:
+
+      `(model_type, model_name, model_input_size, model_version)`
+
+      ```python
+      # Example:
+
+      ("detection", "yolov8s", (640, 640), 8),  # small detection model
+      ("segmentation", "yolov8m-seg", (640, 480), 8),  # medium segmentation model with rectangular input size 
+      ```
+
+   * Add the `model_name` to the keyboard in the `model_command` function.
+
 ## References
 
 1) [Ultralytics](https://github.com/ultralytics/ultralytics)
