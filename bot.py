@@ -27,7 +27,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 logging.basicConfig(level=logging.INFO)
 
-users = {}
+users: dict[int, User] = {}
 
 
 def auth(func):
@@ -328,7 +328,7 @@ async def callback_retina_masks(call: types.CallbackQuery):
     Callback function to handle the retina_masks buttons.
     """
     user_id = call.from_user.id
-    retina_masks_flag = True if call.data.split("_")[1] == "on" else False
+    retina_masks_flag = call.data.split("_")[1] == "on"
 
     users[user_id].retina_masks = retina_masks_flag
 
@@ -400,7 +400,7 @@ if __name__ == "__main__":
         model_name: model_types[model_type](
             checkpoint=f"checkpoints/{model_type}/{model_name}.onnx",
             input_size=model_input_size,
-            version=model_version
+            version=model_version,
         )
         for model_type, model_name, model_input_size, model_version in model_list
     }

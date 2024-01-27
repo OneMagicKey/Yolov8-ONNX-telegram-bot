@@ -33,7 +33,7 @@ class YoloOnnx(ABC):
         input_size: tuple[int, int] = (640, 640),
         conf: float = 0.25,
         iou: float = 0.45,
-        version: Literal[5, 8] = 8
+        version: Literal[5, 8] = 8,
     ) -> None:
         self.input_size = input_size  # (h, w)
         self.conf = conf
@@ -198,7 +198,7 @@ class YoloOnnxDetection(YoloOnnx):
         :param boxes: the array of boxes with shape (n, 4)
         :param save_path: save/to/file.jpg
         :param hide_conf: hide confidence score from the labels
-        :param color_scheme: the 'equal' or 'random' color for objects of the same class
+        :param color_scheme: 'equal' or 'random' color for objects of the same class
         :param language: label language
         :return: rendered image
         """
@@ -258,7 +258,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         :param masks: the array on masks with shape (mask_height, mask_width, n)
         :param save_path: save/to/file.jpg
         :param hide_conf: hide confidence score from the labels
-        :param color_scheme: the 'equal' or 'random' color for objects of the same class
+        :param color_scheme: 'equal' or 'random' color for objects of the same class
         :param language: label language
         :return: rendered image
         """
