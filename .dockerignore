@@ -1,4 +1,6 @@
 # cache and env
+.env
+.venv
 .idea
 .ipynb_checkpoints
 **/__pycache__
@@ -13,6 +15,7 @@ Dockerfile
 
 # checkpoints
 **/*.onnx
+**/*.pt
 !checkpoints/segmentation/*.onnx
 !checkpoints/detection/*.onnx
 
