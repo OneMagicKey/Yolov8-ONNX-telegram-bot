@@ -344,6 +344,24 @@ async def callback_retina_masks(call: types.CallbackQuery):
 
 async def on_startup() -> None:
     await bot.set_webhook(f"{WEBHOOK_URL}", drop_pending_updates=True)
+    await bot.set_my_commands(
+        [
+            types.BotCommand(command="start", description="start the bot"),
+            types.BotCommand(command="help", description="list of available commands"),
+            types.BotCommand(
+                command="language", description="set language preferences"
+            ),
+            types.BotCommand(command="model", description="select the model"),
+            types.BotCommand(
+                command="color_scheme",
+                description="select the color scheme for detected objects",
+            ),
+            types.BotCommand(
+                command="retina_masks",
+                description="enable high-quality segmentation masks",
+            ),
+        ]
+    )
 
 
 async def on_shutdown():
