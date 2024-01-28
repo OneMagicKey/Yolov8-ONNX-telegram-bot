@@ -25,6 +25,17 @@ models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yo
 - [x] Support webhooks to deploy as a webservice on the Render platform ([webhooks-render](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/webhooks-render/) branch)
 - [x] Support pooling to run bot locally ([master](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/master/) branch)
 
+## List of bot commands
+
+* `/start` - start the bot
+* `/help` - list of available commands
+* `/language` - set language preferences
+* `/model` - select the model
+* `/color_scheme` - select the color scheme (`'equal'` or `'random'` color for detected objects of the same class)
+* `/retina_masks` - enable high-quality segmentation masks
+
+These commands are automatically added to the bot at startup.
+
 ## Run the bot on your local machine (pooling version)
 
 1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
