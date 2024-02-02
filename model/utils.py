@@ -68,7 +68,7 @@ def draw_box(
     """
     Draw bounding box and label on the input image.
     """
-    label = f"{label}" if hide_conf else f"{label} {confidence:.2f}"
+    label = f"{label}" if hide_conf else f"{label} {int(confidence * 100)}%"
     th, fs = 2, 0.65  # thickness, fontScale
     lt, ff = cv2.LINE_AA, cv2.FONT_HERSHEY_COMPLEX  # lineType, fontFace
     w, h = cv2.getTextSize(label, ff, fs, th)[0]
