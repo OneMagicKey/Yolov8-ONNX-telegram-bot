@@ -30,8 +30,8 @@ models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yo
 * `/start` - start the bot
 * `/help` - list of available commands
 * `/language` - set language preferences
-* `/model` - select the model
-* `/color_scheme` - select the color scheme (`'equal'` or `'random'` color for detected objects of the same class)
+* `/model` - select a model
+* `/color_scheme` - select a color scheme (`'equal'` or `'random'` color for detected objects of the same class)
 * `/retina_masks` - enable high-quality segmentation masks
 
 These commands are automatically added to the bot at startup.
