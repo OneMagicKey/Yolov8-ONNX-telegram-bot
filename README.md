@@ -9,14 +9,14 @@
 <img width="768" src="images/example.png">
 
 A telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8, 
-implemented in python + openCV DNN + ONNX.
+implemented in Python + OpenCV + ONNXRuntime.
 
 Additionally, the bot can be deployed on the [Render](https://render.com) cloud platform 
 for free.
 
-The webhook version of the running bot requires around 430 MB of RAM and includes 2 
+The webhook version of the running bot requires around 330 MB of RAM and includes 2 
 models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yolov5n`, 
-`yolov8n`, `yolov5n-seg`, and `yolov8n-seg`, and requires around 630 MB of RAM.
+`yolov8n`, `yolov5n-seg`, and `yolov8n-seg`, and requires around 470 MB of RAM.
 
 ## Features
 
