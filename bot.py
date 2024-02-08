@@ -153,7 +153,7 @@ async def model_command(message: types.Message):
     if users[message.from_user.id].language == "ru":
         text = "Выберите модель \n\n"
     else:
-        text = "Select the model \n\n"
+        text = "Select a model \n\n"
 
     keyboard = [
         [
@@ -183,7 +183,7 @@ async def color_scheme_command(message: types.Message):
     if users[message.from_user.id].language == "ru":
         text = "Выберите цветовую схему \n\n"
     else:
-        text = "Select the color scheme \n\n"
+        text = "Select a color scheme \n\n"
 
     keyboard = [
         [
@@ -358,10 +358,10 @@ async def main():
             types.BotCommand(
                 command="language", description="set language preferences"
             ),
-            types.BotCommand(command="model", description="select the model"),
+            types.BotCommand(command="model", description="select a model"),
             types.BotCommand(
                 command="color_scheme",
-                description="select the color scheme for detected objects",
+                description="select a color scheme for detected objects",
             ),
             types.BotCommand(
                 command="retina_masks",
