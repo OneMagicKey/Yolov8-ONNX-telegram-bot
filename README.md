@@ -37,6 +37,7 @@ models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yo
 These commands are automatically added to the bot at startup.
 
 ## Run the bot on your local machine (pooling version)
+### Run via python env (requires python>=3.10)
 
 1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
 2) Clone the repo and install all the dependencies:
@@ -49,6 +50,22 @@ These commands are automatically added to the bot at startup.
 
 3) Add the `TELEGRAM_TOKEN` provided by BotFather to the python environment
 4) Run `bot.py`
+
+### Run via docker
+1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
+2) Clone the repo:
+
+   ```bash
+   git clone https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot.git
+   cd Yolov8-ONNX-telegram-bot
+   ```
+
+3) Replace a dummy `TELEGRAM_TOKEN` in the Dockerfile with your telegram token
+4) Build the image and run it
+   ```bash
+   docker build -t yolo-bot .
+   docker run yolo-bot
+   ```
 
 ## Deploy on the [Render](https://render.com) cloud platform (webhooks version)
 
