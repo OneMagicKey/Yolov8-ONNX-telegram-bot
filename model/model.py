@@ -4,6 +4,7 @@ from typing import Literal
 
 import cv2
 import numpy as np
+import onnxruntime
 
 from model.plots import COCO_names_en, COCO_names_ru, Colors
 from model.utils import (
@@ -46,13 +47,13 @@ class YoloOnnx(ABC):
             lambda: COCO_names_en, en=COCO_names_en, ru=COCO_names_ru
         )
 
-    def build_model(self, checkpoint: str) -> cv2.dnn.Net:
+    def build_model(self, checkpoint: str) -> onnxruntime.InferenceSession:
         """
         Create a model from the provided ONNX checkpoint.
         """
-        model = cv2.dnn.readNetFromONNX(checkpoint)
-        model.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-        model.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+        model = onnxruntime.InferenceSession(
+            checkpoint, providers=["CPUExecutionProvider"]
+        )
 
         return model
 
@@ -67,10 +68,10 @@ class YoloOnnx(ABC):
         """
         (h, w) = self.input_size
         blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (w, h), swapRB=True, crop=False)  # bs, c, h, w
-        self.model.setInput(blob)
 
-        out_blob_names = self.model.getUnconnectedOutLayersNames()
-        output = self.model.forward(outBlobNames=out_blob_names)
+        output_names = [layer.name for layer in self.model.get_outputs()]
+        input_name = self.model.get_inputs()[0].name
+        output = self.model.run(output_names, {input_name: blob})
 
         return output
 
