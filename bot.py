@@ -2,7 +2,9 @@ import io
 import logging
 import os
 from collections import Counter
+from dataclasses import dataclass
 from functools import wraps
+from typing import Literal
 
 import aiogram
 import cv2
@@ -13,7 +15,14 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 from aiohttp import web
 
 from model.model import YoloOnnxDetection, YoloOnnxSegmentation
-from user import User
+
+
+@dataclass
+class User:
+    language: Literal["en", "ru"] = "en"
+    model: str = "yolov8n"
+    color_scheme: Literal["equal", "random"] = "equal"
+    retina_masks: bool = False
 
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -407,6 +416,6 @@ if __name__ == "__main__":
     # Warmup
     test_img = cv2.imread("images/bus.jpg", cv2.IMREAD_COLOR)
     for model in models.values():
-        _ = model(test_img)
+        _ = model(test_img, raw=True)
 
     main()
