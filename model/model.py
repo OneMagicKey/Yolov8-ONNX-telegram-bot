@@ -67,7 +67,7 @@ class YoloOnnx(ABC):
         :return: (boxes_array) or (boxes_and_masks_array, protos_array)
         """
         (h, w) = self.input_size
-        blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (w, h), swapRB=True, crop=False)  # bs, c, h, w
+        blob = cv2.dnn.blobFromImage(img, 1 / 255.0, (w, h), swapRB=True, crop=False)  # n, c, h, w  # fmt: skip
 
         output_names = [layer.name for layer in self.model.get_outputs()]
         input_name = self.model.get_inputs()[0].name
@@ -111,7 +111,7 @@ class YoloOnnx(ABC):
         else:  # v5
             probs_start_idx = 5
             output = output[output[..., 4] > self.conf]
-            output[..., probs_start_idx : probs_start_idx + nc] *= output[..., 4:5]  # conf = obj_conf * cls_conf
+            output[..., probs_start_idx : probs_start_idx + nc] *= output[..., 4:5]  # conf = obj_conf * cls_conf  # fmt: skip
 
         return output, probs_start_idx
 
