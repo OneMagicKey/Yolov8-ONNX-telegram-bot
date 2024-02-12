@@ -46,7 +46,7 @@ def crop_mask(masks: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     :return: cropped masks (h, w, n)
     """
     h, w, n = masks.shape
-    x1, y1, x2, y2 = np.split(boxes.transpose()[None, ...], 4, 1)  # x1 shape(1, 1, n)
+    x1, y1, x2, y2 = np.split(boxes.transpose()[None, ...], 4, 1)  # x1 shape(1, 1, n)  # fmt: skip
 
     r = np.arange(w, dtype=x1.dtype)[None, :, None]  # rows shape(1, w, 1)
     c = np.arange(h, dtype=x1.dtype)[:, None, None]  # cols shape(h, 1, 1)
@@ -80,7 +80,7 @@ def draw_box(
     # Draw label
     outside = y1 - th - h < 0
     text_up = y1 + h if outside else y1 - th  # top border of the text
-    text_bg = (y1 + th + h if outside else y1 - th - h)  # top border of the text background
+    text_bg = (y1 + th + h if outside else y1 - th - h)  # top border of the text background  # fmt: skip
 
     cv2.rectangle(img, (x1 - th, y1 - th), (x1 - th + w, text_bg), color, -1, lt)
     cv2.putText(img, label, (x1 - th, text_up), ff, fs, (255, 255, 255), th, lt)
@@ -112,11 +112,11 @@ def draw_masks(
 
     # apply argmax over the mask scores at each pixel
     indices = masks.argmax(axis=2, keepdims=True)
-    colored_mask = np.take_along_axis((masks > 0.5) * colors, indices, axis=2)  # (mask_height, mask_width, 1, 3)
+    colored_mask = np.take_along_axis((masks > 0.5) * colors, indices, axis=2)  # (mask_height, mask_width, 1, 3)  # fmt: skip
     colored_mask = colored_mask.squeeze() * alpha  # (mask_height, mask_width, 3)
-    colored_mask = cv2.resize(colored_mask, (w, h), interpolation=cv2.INTER_AREA)  # (h, w, 3)
+    colored_mask = cv2.resize(colored_mask, (w, h), interpolation=cv2.INTER_AREA)  # (h, w, 3)  # fmt: skip
 
-    overall_mask = colored_mask.any(axis=-1, keepdims=True)  # union of the masks (h, w, 1)
+    overall_mask = colored_mask.any(axis=-1, keepdims=True)  # union of the masks (h, w, 1)  # fmt: skip
     img = img * (1 - overall_mask * alpha) + colored_mask
 
     return img
@@ -198,7 +198,7 @@ def process_masks(
         up_w, up_h = map(round, [(right - left) / gain, (bottom - top) / gain])
         boxes = xyxy2new_shape(boxes.copy(), original_img_shape, (up_h, up_w))
 
-    masks = cv2.resize(masks, dsize=(up_w, up_h), interpolation=cv2.INTER_LINEAR)  # (up_h, up_w, n)
+    masks = cv2.resize(masks, dsize=(up_w, up_h), interpolation=cv2.INTER_LINEAR)  # (up_h, up_w, n)  # fmt: skip
     masks = masks[..., None] if len(masks.shape) == 2 else masks
     masks = crop_mask(masks, boxes)  # (up_h, up_w, n)
 
