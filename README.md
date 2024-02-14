@@ -8,14 +8,14 @@
 
 <img width="768" src="images/example.png">
 
-A telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8, 
+A telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8,
 implemented in Python + OpenCV + ONNXRuntime.
 
-Additionally, the bot can be deployed on the [Render](https://render.com) cloud platform 
+Additionally, the bot can be deployed on the [Render](https://render.com) cloud platform
 for free.
 
-The webhook version of the running bot requires around 330 MB of RAM and includes 2 
-models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yolov5n`, 
+The webhook version of the running bot requires around 330 MB of RAM and includes 2
+models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yolov5n`,
 `yolov8n`, `yolov5n-seg`, and `yolov8n-seg`, and requires around 470 MB of RAM.
 
 ## Features
@@ -45,7 +45,7 @@ These commands are automatically added to the bot at startup.
    ```bash
    git clone https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot.git
    cd Yolov8-ONNX-telegram-bot
-   pip install -r requirements.txt 
+   pip install -r requirements.txt
    ```
 
 3) Add the `TELEGRAM_TOKEN` provided by BotFather to the python environment
@@ -84,13 +84,13 @@ These commands are automatically added to the bot at startup.
    * Name - `PYTHON_VERSION`, value `3.10.13`
 6) Deploy the app
 
-Instances under the Render free plan will spin down after a period of inactivity, 
-which is typically around 15 minutes. To prevent this, configure [cron-job](https://cron-job.org/) 
+Instances under the Render free plan will spin down after a period of inactivity,
+which is typically around 15 minutes. To prevent this, configure [cron-job](https://cron-job.org/)
 to send a POST request to the bot every 10 minutes, keeping it running permanently.
 
 ## Addition of new models
 
-To add `n/s/m/l/x` versions of Yolo to the bot or to adjust the model's image input size, 
+To add `n/s/m/l/x` versions of Yolo to the bot or to adjust the model's image input size,
 follow these steps:
 
 1) Export a model to ONNX format:
@@ -98,22 +98,22 @@ follow these steps:
    ```bash
    !pip install ultralytics
    ```
-   
+
    ```python
    from ultralytics import YOLO
-   
+
    # Load a model
    model_name = 'yolov8s'  # [yolov8s, yolov8m, yolov8s-seg, yolov8m-seg, ...]
-   model = YOLO(f"{model_name}.pt") 
-   
+   model = YOLO(f"{model_name}.pt")
+
    # Image size
    height, width = (640, 640)  # [(640, 480), (480, 640), ...]
-   
+
    # Export the model
    model.export(format='onnx', opset=12, simplify=True, optimize=True, imgsz=(height, width))
    ```
 
-2) Place the resulting `.onnx` file in the `checkpoints/detection` or `checkpoints/segmentation` 
+2) Place the resulting `.onnx` file in the `checkpoints/detection` or `checkpoints/segmentation`
    folder, depending on the model type
 3) Modify `bot.py`:
    * Add the model to the `model_list` in the following format:
@@ -124,7 +124,7 @@ follow these steps:
       # Example:
 
       ("detection", "yolov8s", (640, 640), 8),  # small detection model
-      ("segmentation", "yolov8m-seg", (640, 480), 8),  # medium segmentation model with rectangular input size 
+      ("segmentation", "yolov8m-seg", (640, 480), 8),  # medium segmentation model with rectangular input size
       ```
 
    * Add the `model_name` to the keyboard in the `model_command` function.
