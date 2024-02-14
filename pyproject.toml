@@ -1,0 +1,15 @@
+[project]
+python_requires = ">=3.10"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+
+[tool.ruff]
+exclude = ['__init__.py', 'tests']
+line-length = 88
+
+[tool.ruff.lint]
+select = ["A", "B", "E", "I"]
+ignore = ["E501"]
