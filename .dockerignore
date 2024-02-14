@@ -1,0 +1,28 @@
+# cache and env
+.env
+.venv
+.idea
+.ipynb_checkpoints
+**/__pycache__
+yolo_bot_env
+**/*.ipynb
+**/*.py[cod]
+
+.*
+*.txt
+!requirements.txt
+Dockerfile
+
+# checkpoints
+**/*.onnx
+**/*.pt
+!checkpoints/segmentation/*.onnx
+!checkpoints/detection/*.onnx
+
+# example images
+**/*.jpg
+**/*.png
+!images/bus.jpg
+
+# tests
+tests
