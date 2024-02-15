@@ -16,13 +16,13 @@ Dockerfile
 # checkpoints
 **/*.onnx
 **/*.pt
-!checkpoints/segmentation/*.onnx
-!checkpoints/detection/*.onnx
+!src/checkpoints/segmentation/*.onnx
+!src/checkpoints/detection/*.onnx
 
 # example images
 **/*.jpg
 **/*.png
-!images/bus.jpg
+!src/images/bus.jpg
 
 # tests
 tests

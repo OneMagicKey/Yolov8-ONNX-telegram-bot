@@ -3,12 +3,13 @@ python_requires = ">=3.10"
 
 [tool.black]
 line-length = 88
-target-version = ['py310']
+target-version = ["py310"]
 include = '\.pyi?$'
 
 [tool.ruff]
-exclude = ['__init__.py', 'tests']
+exclude = ["tests"]
 line-length = 88
+src = ["src"]
 
 [tool.ruff.lint]
 select = ["A", "B", "E", "I"]

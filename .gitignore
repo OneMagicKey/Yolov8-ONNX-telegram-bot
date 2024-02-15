@@ -166,17 +166,19 @@ cython_debug/
 /.*
 !.gitignore
 !.dockerignore
+!.pre-commit-config.yaml
 *.txt
 !requirements.txt
 
 # Checkpoints
 *.onnx
 *.pt
-!checkpoints/segmentation/*.onnx
-!checkpoints/detection/*.onnx
+!src/checkpoints/segmentation/*.onnx
+!src/checkpoints/detection/*.onnx
 
 # Example images
 *.jpg
 *.png
-!images/bus.jpg
-!images/zidane.jpg
+!example/example.png
+!src/images/bus.jpg
+!src/images/zidane.jpg

@@ -15,12 +15,13 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 from aiohttp import web
 
 from model.model import YoloOnnxDetection, YoloOnnxSegmentation
+from utils import ModelInfo, create_keyboard_for_models, init_models
 
 
 @dataclass
 class User:
+    model: str
     language: Literal["en", "ru"] = "en"
-    model: str = "yolov8n"
     color_scheme: Literal["equal", "random"] = "equal"
     retina_masks: bool = False
 
@@ -74,7 +75,7 @@ async def start_command(message: types.Message):
     else:
         language = users[user_id].language
 
-    user = User(language)
+    user = User(model_list[0].name, language)  # use the first model in the list as default  # fmt: skip
     users[user_id] = user
 
     if user.language == "ru":
@@ -161,16 +162,10 @@ async def model_command(message: types.Message):
     else:
         text = "Select a model \n\n"
 
-    keyboard = [
-        [
-            types.InlineKeyboardButton(text="yolov8n", callback_data="yolov8n"),
-            types.InlineKeyboardButton(text="yolov8n-seg", callback_data="yolov8n-seg"),
-        ]
-    ]
     await message.answer(
         text,
         parse_mode="markdown",
-        reply_markup=types.InlineKeyboardMarkup(inline_keyboard=keyboard),
+        reply_markup=types.InlineKeyboardMarkup(inline_keyboard=model_command_keyboard),
     )
 
 
@@ -397,25 +392,13 @@ def main():
     web.run_app(app, host=WEBAPP_HOST, port=int(WEBAPP_PORT))
 
 
+model_list = [
+    ModelInfo("detection", "yolov8n", (640, 640), 8),
+    ModelInfo("segmentation", "yolov8n-seg", (640, 640), 8),
+]
+
 if __name__ == "__main__":
-    model_list = [
-        ("detection", "yolov8n", (640, 640), 8),
-        ("segmentation", "yolov8n-seg", (640, 640), 8),
-    ]
-
-    model_types = {"segmentation": YoloOnnxSegmentation, "detection": YoloOnnxDetection}
-
-    models = {
-        model_name: model_types[model_type](
-            checkpoint=f"checkpoints/{model_type}/{model_name}.onnx",
-            input_size=model_input_size,
-            version=model_version,
-        )
-        for model_type, model_name, model_input_size, model_version in model_list
-    }
-    # Warmup
-    test_img = cv2.imread("images/bus.jpg", cv2.IMREAD_COLOR)
-    for model in models.values():
-        _ = model(test_img, raw=True)
+    models = init_models(model_list)
+    model_command_keyboard = create_keyboard_for_models(list(models.keys()))
 
     main()
