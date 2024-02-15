@@ -1,12 +1,12 @@
 <h2 align="center">YOLOv8-ONNX-telegram-bot</h2>
 
 <p align="center">
-<img src="https://img.shields.io/github/languages/top/OneMagicKey/Yolov8-ONNX-telegram-bot">
-<img src ="https://img.shields.io/github/repo-size/OneMagicKey/Yolov8-ONNX-telegram-bot">
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<img src ="https://img.shields.io/github/repo-size/OneMagicKey/Yolov8-ONNX-telegram-bot">
+<a href="https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/actions/workflows/ci.yml"><img src="https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
-<img width="768" src="images/example.png">
+<img width="768" src="example/example.png">
 
 A telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8,
 implemented in Python + OpenCV + ONNXRuntime.
@@ -48,8 +48,9 @@ These commands are automatically added to the bot at startup.
    pip install -r requirements.txt
    ```
 
-3) Add the `TELEGRAM_TOKEN` provided by BotFather to the python environment
-4) Run `bot.py`
+3) Add the `TELEGRAM_TOKEN` provided by BotFather to the python environment or replace
+`TOKEN` in `src/bot.py` with your token
+4) Run `python src/bot.py`
 
 ### Run via docker
 1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
@@ -77,7 +78,7 @@ These commands are automatically added to the bot at startup.
    * Branch - `webhooks-render`
    * Runtime - `Python 3`
    * Build Command - `pip install -r requirements.txt`
-   * Start Command - `python bot.py`
+   * Start Command - `python src/bot.py`
    * Instance Type = `Free`
 5) Add Environment Variables:
    * Name - `TELEGRAM_TOKEN`, value `{YOUR_TELEGRAM_TOKEN}`
@@ -113,21 +114,18 @@ follow these steps:
    model.export(format='onnx', opset=12, simplify=True, optimize=True, imgsz=(height, width))
    ```
 
-2) Place the resulting `.onnx` file in the `checkpoints/detection` or `checkpoints/segmentation`
+2) Place the resulting `.onnx` file in the `src/checkpoints/detection` or `src/checkpoints/segmentation`
    folder, depending on the model type
-3) Modify `bot.py`:
-   * Add the model to the `model_list` in the following format:
+3) Add the model to the `model_list` in `src/bot.py` using the following format:
 
-      `(model_type, model_name, model_input_size, model_version)`
+   `ModelInfo(model_type, model_name, model_input_size, model_version)`
 
-      ```python
-      # Example:
+   ```python
+   # Example:
 
-      ("detection", "yolov8s", (640, 640), 8),  # small detection model
-      ("segmentation", "yolov8m-seg", (640, 480), 8),  # medium segmentation model with rectangular input size
-      ```
-
-   * Add the `model_name` to the keyboard in the `model_command` function.
+   ModelInfo("detection", "yolov8s", (640, 640), 8),  # small detection model
+   ModelInfo("segmentation", "yolov8m-seg", (640, 480), 8),  # medium segmentation model with rectangular input size
+   ```
 
 ## References
 

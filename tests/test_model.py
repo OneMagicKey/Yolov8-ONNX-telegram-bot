@@ -5,7 +5,7 @@ import unittest
 import cv2
 import numpy as np
 
-from model.model import YoloOnnxDetection, YoloOnnxSegmentation
+from src.model.model import YoloOnnxDetection, YoloOnnxSegmentation
 
 
 class YoloTestCases(unittest.TestCase):
@@ -16,21 +16,21 @@ class YoloTestCases(unittest.TestCase):
             cls.segmentation_model = cls.load_segmentation_model()
             cls.img = cls.load_img()
             cls.img_empty = cls.create_empty_img()
-        except:
-            assert False
+        except Exception as e:
+            raise AssertionError() from e
 
     @staticmethod
-    def load_detection_model(path: str = "../checkpoints/detection/yolov8n.onnx"):
+    def load_detection_model(path: str = "src/checkpoints/detection/yolov8n.onnx"):
         return YoloOnnxDetection(path, input_size=(640, 640), version=8)
 
     @staticmethod
     def load_segmentation_model(
-        path: str = "../checkpoints/segmentation/yolov8n-seg.onnx",
+        path: str = "src/checkpoints/segmentation/yolov8n-seg.onnx",
     ):
         return YoloOnnxSegmentation(path, input_size=(640, 640), version=8)
 
     @staticmethod
-    def load_img(path: str = "../images/zidane.jpg"):
+    def load_img(path: str = "src/images/zidane.jpg"):
         return cv2.imread(path, cv2.IMREAD_COLOR)
 
     @staticmethod
@@ -64,7 +64,7 @@ class YoloTestCases(unittest.TestCase):
 
     def test_render_segmentation(self):
         img, yolo = self.img, self.segmentation_model
-        path_save_to = "result_segmentation.jpg"
+        path_save_to = "tests/result_segmentation.jpg"
 
         classes, confs, boxes, masks = yolo(img)
         yolo.render(img, classes, confs, boxes, masks, save_path=path_save_to)
@@ -73,7 +73,7 @@ class YoloTestCases(unittest.TestCase):
 
     def test_render_retina_segmentation(self):
         img, yolo = self.img, self.segmentation_model
-        path_save_to = "result_segmentation.jpg"
+        path_save_to = "tests/result_segmentation.jpg"
 
         classes, confs, boxes, masks = yolo(img, retina_masks=True)
         yolo.render(img, classes, confs, boxes, masks, save_path=path_save_to)
@@ -82,7 +82,7 @@ class YoloTestCases(unittest.TestCase):
 
     def test_render_detection(self):
         img, yolo = self.img, self.detection_model
-        path_save_to = "result_detection.jpg"
+        path_save_to = "tests/result_detection.jpg"
 
         classes, confs, boxes = yolo(img)
         yolo.render(img, classes, confs, boxes, save_path=path_save_to)
@@ -91,7 +91,7 @@ class YoloTestCases(unittest.TestCase):
 
     def test_render_empty_segmentation(self):
         img, yolo = self.img_empty, self.segmentation_model
-        path_save_to = "white_seg.jpg"
+        path_save_to = "tests/white_seg.jpg"
 
         classes, confs, boxes, masks = yolo(img)
         yolo.render(img, classes, confs, boxes, masks, save_path=path_save_to)
@@ -102,7 +102,7 @@ class YoloTestCases(unittest.TestCase):
 
     def test_render_empty_detection(self):
         img, yolo = self.img_empty, self.detection_model
-        path_save_to = "white_det.jpg"
+        path_save_to = "tests/white_det.jpg"
 
         classes, confs, boxes = yolo(img)
         yolo.render(img, classes, confs, boxes, save_path=path_save_to)

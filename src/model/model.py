@@ -18,6 +18,10 @@ from model.utils import (
 
 
 class YoloOnnx(ABC):
+    """
+    Base class for the Yolo model
+    """
+
     __slots__ = (
         "input_size",
         "conf",
@@ -49,7 +53,7 @@ class YoloOnnx(ABC):
 
     def build_model(self, checkpoint: str) -> onnxruntime.InferenceSession:
         """
-        Create a model from the provided ONNX checkpoint.
+        Create a model from the ONNX checkpoint.
         """
         model = onnxruntime.InferenceSession(
             checkpoint, providers=["CPUExecutionProvider"]
