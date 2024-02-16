@@ -14,14 +14,16 @@ implemented in Python + OpenCV + ONNXRuntime.
 Additionally, the bot can be deployed on the [Render](https://render.com) cloud platform
 for free.
 
-The webhook version of the running bot requires around 330 MB of RAM and includes 2
-models: `yolov8n` and `yolov8n-seg`.  The pooling version includes 4 models: `yolov5n`,
-`yolov8n`, `yolov5n-seg`, and `yolov8n-seg`, and requires around 470 MB of RAM.
+The webhook version of the running bot requires around 380 MB of RAM and includes 2
+**quantized** models: `yolov8s` and `yolov8s-seg`. The pooling version includes 4
+**quantized** models: `yolov5s`, `yolov8s`, `yolov5s-seg`, and `yolov8s-seg`,
+and requires around 560 MB of RAM.
 
 ## Features
 
 - [x] ENG / RU languages
 - [x] Object Detection / Instance Segmentation
+- [x] Quantized YOLO models
 - [x] Support webhooks to deploy as a webservice on the Render platform ([webhooks-render](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/webhooks-render/) branch)
 - [x] Support pooling to run bot locally ([master](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/master/) branch)
 
