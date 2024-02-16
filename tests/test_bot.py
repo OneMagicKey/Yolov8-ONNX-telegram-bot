@@ -8,6 +8,7 @@ class BotTestCase(unittest.TestCase):
     def setUpClass(cls) -> None:
         dummy_token = "1234567890:ABCDEfgh-q1wERT2Yuiopasdfghjklzxc3v"
         os.environ["TELEGRAM_TOKEN"] = dummy_token
+        os.environ["RENDER_EXTERNAL_URL"] = "url"
 
     def test_model_initialization(self):
         from bot import model_list
