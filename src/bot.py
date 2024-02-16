@@ -362,10 +362,10 @@ async def main():
 
 
 model_list = [
-    ModelInfo("detection", "yolov8n", (640, 640), 8),
-    ModelInfo("detection", "yolov5n", (640, 640), 5),
-    ModelInfo("segmentation", "yolov8n-seg", (640, 640), 8),
-    ModelInfo("segmentation", "yolov5n-seg", (640, 640), 5),
+    ModelInfo("detection", "yolov8s", (640, 640), 8),
+    ModelInfo("detection", "yolov5s", (640, 640), 5),
+    ModelInfo("segmentation", "yolov8s-seg", (640, 640), 8),
+    ModelInfo("segmentation", "yolov5s-seg", (640, 640), 5),
 ]
 
 if __name__ == "__main__":
