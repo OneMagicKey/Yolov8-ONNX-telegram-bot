@@ -1,28 +1,18 @@
-# cache and env
-.env
-.venv
-.idea
-.ipynb_checkpoints
-**/__pycache__
-yolo_bot_env
-**/*.ipynb
-**/*.py[cod]
+# Ignore all files
+**
 
-.*
-*.txt
-!requirements.txt
-Dockerfile
-
-# checkpoints
-**/*.onnx
-**/*.pt
+# Checkpoints
 !src/checkpoints/segmentation/*.onnx
 !src/checkpoints/detection/*.onnx
 
-# example images
-**/*.jpg
-**/*.png
-!src/images/bus.jpg
+# Bot
+!src/model
+!src/__init__.py
+!src/bot.py
+!src/utils.py
 
-# tests
-tests
+# Install files
+!src/images/bus.jpg
+!requirements.txt
+
+**/__pycache__
