@@ -19,7 +19,16 @@ from model.utils import (
 
 class YoloOnnx(ABC):
     """
-    Base class for the Yolo model
+    Base class for YOLO models
+
+    Attributes:
+        input_size (tuple[int, int]): the input size of the model in (height, width).
+        conf (float): confidence threshold for non-maximum suppression.
+        iou (float): intersection over union threshold for non-maximum suppression.
+        version (Literal[5, 8]): version of YOLO model (5 or 8).
+        model (onnxruntime.InferenceSession): ONNX inference session for the model.
+        colors (Colors): instance of Colors class for coloring boxes and masks.
+        labels_name (defaultdict): mapping of class labels in different languages.
     """
 
     __slots__ = (
@@ -102,7 +111,7 @@ class YoloOnnx(ABC):
 
     def version_handler(self, output: np.ndarray, nc: int) -> tuple[np.ndarray, int]:
         """
-        Convert output of the model to the predefined format.
+        Convert output of the model to a single format.
 
         :param output: an array with boxes from the model's output
         :param nc: number of classes
@@ -190,7 +199,7 @@ class YoloOnnxDetection(YoloOnnx):
         confs: np.ndarray,
         boxes: np.ndarray,
         save_path: str | None = None,
-        hide_conf: bool = True,
+        hide_conf: bool = False,
         color_scheme: Literal["equal", "random"] = "equal",
         language: Literal["en", "ru"] = "en",
     ) -> np.ndarray:
@@ -249,7 +258,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         boxes: np.ndarray,
         masks: np.ndarray,
         save_path: str | None = None,
-        hide_conf: bool = True,
+        hide_conf: bool = False,
         color_scheme: Literal["equal", "random"] = "equal",
         language: Literal["en", "ru"] = "en",
     ) -> np.ndarray:
@@ -290,7 +299,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         retina_masks: bool = False,
     ) -> tuple[np.ndarray, ...]:
         """
-        Convert raw output to arrays of classes, confidences, boxes and masks.
+        Convert raw output to arrays of classes, confidences, boxes, and masks.
         """
         output, protos = output
         classes, confs, boxes, mask_coefs = self.nms(

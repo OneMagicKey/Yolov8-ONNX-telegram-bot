@@ -235,7 +235,6 @@ async def model_forward(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
     result_img = net.render(
         img,
         *result,
-        hide_conf=False,
         language=user.language,
         color_scheme=user.color_scheme,
     )
@@ -256,12 +255,11 @@ async def process_image(message: types.Message):
     """
     Detect objects in the image from the message.
 
-    :param message: user message with attached image
+    :param message: user message with an attached image
     """
     user: User = users[message.from_user.id]
 
-    file_io = io.BytesIO()
-    await bot.download(message.photo[-1], destination=file_io)
+    file_io = await message.bot.download(file=message.photo[-1])
     img = cv2.imdecode(np.frombuffer(file_io.read(), np.uint8), cv2.IMREAD_COLOR)
 
     result_img, text = await model_forward(img, user)
@@ -275,7 +273,7 @@ async def process_image(message: types.Message):
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("yolo")))
 async def callback_model(call: types.CallbackQuery):
     """
-    Callback function to handle the model buttons.
+    Callback function to handle model keyboard buttons.
     """
     user_id = call.from_user.id
     new_model_name = call.data
@@ -293,7 +291,7 @@ async def callback_model(call: types.CallbackQuery):
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("language")))
 async def callback_language(call: types.CallbackQuery):
     """
-    Callback function to handle the language buttons.
+    Callback function to handle language keyboard buttons.
     """
     new_language = call.data.split("_")[1]
     user_id = call.from_user.id
@@ -311,7 +309,7 @@ async def callback_language(call: types.CallbackQuery):
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("color")))
 async def callback_color_scheme(call: types.CallbackQuery):
     """
-    Callback function to handle the color_scheme buttons.
+    Callback function to handle color_scheme keyboard buttons.
     """
     user_id = call.from_user.id
     new_color_scheme = call.data.split("_")[1]
@@ -329,7 +327,7 @@ async def callback_color_scheme(call: types.CallbackQuery):
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("retina")))
 async def callback_retina_masks(call: types.CallbackQuery):
     """
-    Callback function to handle the retina_masks buttons.
+    Callback function to handle retina_masks keyboard buttons.
     """
     user_id = call.from_user.id
     retina_masks_flag = call.data.split("_")[1] == "on"
