@@ -6,7 +6,7 @@
 <a href="https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/actions/workflows/ci.yml"><img src="https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
-<img width="768" src="example/example.png">
+<h2 align="center"><img width="768" src="example/example.png"></h2>
 
 A telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8,
 implemented in Python + OpenCV + ONNXRuntime.
@@ -64,14 +64,21 @@ These commands are automatically added to the bot at startup.
    ```
 
 3) Replace a dummy `TELEGRAM_TOKEN` in the Dockerfile with your telegram token
-4) Build the image and run it
+4) Build the image and run it:
    ```bash
    docker build -t yolo-bot .
    docker run yolo-bot
    ```
 
 ## Deploy on the [Render](https://render.com) cloud platform (webhooks version)
+### Automatic deployment
+1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
+2) Create a Render account
+3) Click on the button below to deploy
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/tree/webhooks-render)
+
+### Manual deployment
 1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
 2) Create a Render account
 3) Go to `New` -> `Web Service` -> `Build and deploy from a Git repository`
@@ -87,7 +94,7 @@ These commands are automatically added to the bot at startup.
    * Name - `PYTHON_VERSION`, value `3.10.13`
 6) Deploy the app
 
-Instances under the Render free plan will spin down after a period of inactivity,
+> Instances under the Render free plan will spin down after a period of inactivity,
 which is typically around 15 minutes. To prevent this, configure [cron-job](https://cron-job.org/)
 to send a POST request to the bot every 10 minutes, keeping it running permanently.
 
