@@ -1,0 +1,13 @@
+services:
+
+  - type: web
+    name: yolobot
+    runtime: docker
+    region: frankfurt
+    plan: free
+    branch: webhooks-render
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+
+    autoDeploy: false
