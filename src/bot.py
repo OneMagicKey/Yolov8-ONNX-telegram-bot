@@ -271,6 +271,7 @@ async def process_image(message: types.Message):
 
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("yolo")))
+@auth
 async def callback_model(call: types.CallbackQuery):
     """
     Callback function to handle model keyboard buttons.
@@ -289,6 +290,7 @@ async def callback_model(call: types.CallbackQuery):
 
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("language")))
+@auth
 async def callback_language(call: types.CallbackQuery):
     """
     Callback function to handle language keyboard buttons.
@@ -307,6 +309,7 @@ async def callback_language(call: types.CallbackQuery):
 
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("color")))
+@auth
 async def callback_color_scheme(call: types.CallbackQuery):
     """
     Callback function to handle color_scheme keyboard buttons.
@@ -325,6 +328,7 @@ async def callback_color_scheme(call: types.CallbackQuery):
 
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("retina")))
+@auth
 async def callback_retina_masks(call: types.CallbackQuery):
     """
     Callback function to handle retina_masks keyboard buttons.
