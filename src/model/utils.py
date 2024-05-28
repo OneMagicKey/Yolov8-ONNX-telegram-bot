@@ -13,6 +13,16 @@ def xywh2box(boxes: np.ndarray, scale: float, padw: float, padh: float) -> np.nd
     return boxes
 
 
+def xyxy2xyxy(boxes: np.ndarray, scale: float, padw: float, padh: float) -> np.ndarray:
+    """
+    Unscale and unpad (x1,y1,x2,y2) to original image size.
+    """
+    boxes -= np.array([padw, padh, padw, padh])
+    boxes /= scale
+
+    return boxes
+
+
 def xywh2xyxy(boxes: np.ndarray) -> np.ndarray:
     """
     Convert (x,y,w,h) to (x1,y1,x2,y2).

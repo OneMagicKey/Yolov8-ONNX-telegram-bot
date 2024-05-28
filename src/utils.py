@@ -16,13 +16,13 @@ class ModelInfo:
         type (str): The type of the model ('detection' or 'segmentation').
         name (str): The name of the model (e.g., 'yolov8s', 'yolov5s-seg').
         input_size (tuple[int, int]): The size of the input data as a tuple (height, width).
-        version (Literal[5, 8]): The version of the model, restricted to either 5 or 8.
+        version (Literal[5, 8, 10]): The version of the model, restricted to 5, 8 or 10.
     """
 
     type: str
     name: str
     input_size: tuple[int, int]
-    version: Literal[5, 8]
+    version: Literal[5, 8, 10]
 
 
 def init_models(
