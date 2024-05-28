@@ -106,7 +106,7 @@ follow these steps:
 1) Export a model to ONNX format:
 
    ```bash
-   !pip install ultralytics
+   pip install ultralytics
    ```
 
    ```python
