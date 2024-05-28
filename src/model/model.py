@@ -14,6 +14,7 @@ from model.utils import (
     process_masks,
     xywh2box,
     xywh2xyxy,
+    xyxy2xyxy,
 )
 
 
@@ -47,7 +48,7 @@ class YoloOnnx(ABC):
         input_size: tuple[int, int] = (640, 640),
         conf: float = 0.25,
         iou: float = 0.45,
-        version: Literal[5, 8] = 8,
+        version: Literal[5, 8, 10] = 8,
     ) -> None:
         self.input_size = input_size  # (h, w)
         self.conf = conf
@@ -148,7 +149,7 @@ class YoloOnnx(ABC):
 
         return colors
 
-    def nms(
+    def v5v8postprocess(
         self,
         output: np.ndarray,
         ratio: float,
@@ -181,6 +182,33 @@ class YoloOnnx(ABC):
             return classes, confs, xywh2xyxy(boxes), masks_coefs[indices]
 
         return classes, confs, xywh2xyxy(boxes)
+
+    def v10postprocess(
+        self,
+        output: np.ndarray,
+        ratio: float,
+        pad: tuple[float, float],
+        return_masks: bool = False,  # TODO
+    ) -> tuple[np.ndarray, ...]:
+        """
+        Post-processes the output from a YOLOv10 model to extract classes, confidences,
+        and bounding boxes.
+
+        This function takes the raw output of the model, filters out low-confidence
+        detections, and adjusts the bounding box coordinates based on the provided ratio
+        and padding values.
+
+        :return: classes, confidences and boxes
+        """
+
+        boxes, confs, classes = np.split(output[0], [4, 5], axis=-1)
+        indices = np.argwhere(confs > self.conf)[:, 0]
+
+        classes = classes[indices, 0].astype(np.int32)
+        confs = confs[indices, 0]
+        boxes = xyxy2xyxy(boxes[indices], ratio, padw=pad[0], padh=pad[1])
+
+        return classes, confs, boxes
 
     @abstractmethod
     def postprocess(self, *args, **kwargs) -> tuple[np.ndarray, ...]:
@@ -240,7 +268,13 @@ class YoloOnnxDetection(YoloOnnx):
         """
         Convert raw output to arrays of classes, confidences and boxes.
         """
-        return self.nms(output[0], ratio, pad)
+        match self.version:
+            case 10:
+                return self.v10postprocess(output[0], ratio, pad)
+            case 5 | 8:
+                return self.v5v8postprocess(output[0], ratio, pad)
+            case _:
+                raise NotImplemented
 
     def __call__(
         self, img: np.ndarray, raw: bool = False, **kwargs
@@ -308,7 +342,7 @@ class YoloOnnxSegmentation(YoloOnnx):
         Convert raw output to arrays of classes, confidences, boxes, and masks.
         """
         output, protos = output
-        classes, confs, boxes, mask_coefs = self.nms(
+        classes, confs, boxes, mask_coefs = self.v5v8postprocess(
             output, ratio, pad, return_masks=True
         )
         masks = process_masks(
