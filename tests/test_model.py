@@ -35,8 +35,7 @@ class YoloTestCases(unittest.TestCase):
 
     @staticmethod
     def create_empty_img():
-        img = np.zeros((512, 512, 3), dtype=np.uint8)
-        img.fill(255)
+        img = np.ones((512, 512, 3), dtype=np.uint8)
 
         return img
 
@@ -91,7 +90,7 @@ class YoloTestCases(unittest.TestCase):
 
     def test_render_empty_segmentation(self):
         img, yolo = self.img_empty, self.segmentation_model
-        path_save_to = "tests/white_seg.jpg"
+        path_save_to = "tests/empty_seg.jpg"
 
         classes, confs, boxes, masks = yolo(img)
         yolo.render(img, classes, confs, boxes, masks, save_path=path_save_to)
@@ -102,7 +101,7 @@ class YoloTestCases(unittest.TestCase):
 
     def test_render_empty_detection(self):
         img, yolo = self.img_empty, self.detection_model
-        path_save_to = "tests/white_det.jpg"
+        path_save_to = "tests/empty_det.jpg"
 
         classes, confs, boxes = yolo(img)
         yolo.render(img, classes, confs, boxes, save_path=path_save_to)

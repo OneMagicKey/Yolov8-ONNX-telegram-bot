@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
-import cv2
+import numpy as np
 from aiogram import types
 
 from model.model import YoloOnnxDetection, YoloOnnxSegmentation
@@ -43,7 +43,7 @@ def init_models(
     }
 
     # Warmup
-    test_img = cv2.imread("src/images/bus.jpg", cv2.IMREAD_COLOR)
+    test_img = np.ones((640, 640, 3), dtype=np.uint8)
     for model in bot_models.values():
         _ = model(test_img, raw=True)
 
