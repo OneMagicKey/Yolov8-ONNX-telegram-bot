@@ -109,24 +109,25 @@ class YoloOnnx(ABC):
 
         return result_list
 
-    def version_handler(self, output: np.ndarray, nc: int) -> tuple[np.ndarray, int]:
+    def version_handler(self, output: np.ndarray, nc: int) -> np.ndarray:
         """
         Convert output of the model to a single format.
 
         :param output: an array with boxes from the model's output
         :param nc: number of classes
-        :return: output with shape (num_boxes, probs_start_idx+num_classes+num_masks) and probs_start_idx
+        :return: output with shape (num_objects, 4+num_classes+num_masks)
         """
-        if self.version == 8:
-            probs_start_idx = 4
-            output = output.transpose((0, 2, 1)).squeeze(0)
+        match self.version:
+            case 8:
+                output = output.transpose((0, 2, 1)).squeeze(0)
+            case 5:
+                output = output[output[..., 4] > self.conf]
+                output[..., 5 : 5 + nc] *= output[..., 4:5]  # conf = obj_conf * cls_conf  # fmt: skip
+                output = np.delete(output, 4, axis=1)  # remove obj_conf to preserve the format   # fmt: skip
+            case _:
+                output = output.squeeze(0)
 
-        else:  # v5
-            probs_start_idx = 5
-            output = output[output[..., 4] > self.conf]
-            output[..., probs_start_idx : probs_start_idx + nc] *= output[..., 4:5]  # conf = obj_conf * cls_conf  # fmt: skip
-
-        return output, probs_start_idx
+        return output
 
     def get_colors(
         self, classes: np.ndarray, color_scheme: Literal["equal", "random"] = "equal"
@@ -155,26 +156,31 @@ class YoloOnnx(ABC):
         return_masks: bool = False,
     ) -> tuple[np.ndarray, ...]:
         """
-        Apply non-maximum suppression to the output of the model.
+        Post-processes the output from a YOLOv5/YOLOv8 model to extract classes,
+        confidences, bounding boxes, and optionally, mask coefficients.
+
+        This function processes the raw output from the model, filters detections using
+        non-maximum suppression, and adjusts the bounding box coordinates based on the
+        provided ratio and padding values.
 
         :return: classes, confidences, boxes and (optional) mask coefficients
         """
         nc = len(self.labels_name["en"])
-        output, probs_id = self.version_handler(output, nc)
+        output = self.version_handler(output, nc)
 
-        classes = output[..., probs_id : probs_id + nc].argmax(axis=-1)
-        boxes = xywh2box(output[..., :4], ratio, padw=pad[0], padh=pad[1])
-        confs = output[..., probs_id : probs_id + nc]
+        boxes, confs, masks_coefs = np.split(output, [4, 4 + nc], axis=1)
+        classes = confs.argmax(axis=-1)
         confs = confs[np.arange(classes.shape[-1]), classes]
+        boxes = xywh2box(boxes, ratio, padw=pad[0], padh=pad[1])
 
         indices = cv2.dnn.NMSBoxes(boxes, confs, self.conf, self.iou)
         indices = list(indices)
+        classes, confs, boxes = classes[indices], confs[indices], boxes[indices]
 
         if return_masks:
-            masks = output[indices, probs_id + nc :]
-            return classes[indices], confs[indices], xywh2xyxy(boxes[indices]), masks
+            return classes, confs, xywh2xyxy(boxes), masks_coefs[indices]
 
-        return classes[indices], confs[indices], xywh2xyxy(boxes[indices])
+        return classes, confs, xywh2xyxy(boxes)
 
     @abstractmethod
     def postprocess(self, *args, **kwargs) -> tuple[np.ndarray, ...]:

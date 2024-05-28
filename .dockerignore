@@ -12,7 +12,6 @@
 !src/utils.py
 
 # Install files
-!src/images/bus.jpg
 !requirements.txt
 
 **/__pycache__
