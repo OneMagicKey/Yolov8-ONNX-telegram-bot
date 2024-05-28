@@ -20,8 +20,8 @@ class YoloTestCases(unittest.TestCase):
             raise AssertionError() from e
 
     @staticmethod
-    def load_detection_model(path: str = "src/checkpoints/detection/yolov8s.onnx"):
-        return YoloOnnxDetection(path, input_size=(640, 640), version=8)
+    def load_detection_model(path: str = "src/checkpoints/detection/yolov10s.onnx"):
+        return YoloOnnxDetection(path, input_size=(640, 640), version=10)
 
     @staticmethod
     def load_segmentation_model(

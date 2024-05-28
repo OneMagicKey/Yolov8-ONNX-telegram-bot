@@ -396,7 +396,6 @@ def main():
 
 model_list = [
     ModelInfo("detection", "yolov10s", (640, 640), 10),
-    ModelInfo("detection", "yolov8s", (640, 640), 8),
     ModelInfo("segmentation", "yolov8s-seg", (640, 640), 8),
 ]
 
