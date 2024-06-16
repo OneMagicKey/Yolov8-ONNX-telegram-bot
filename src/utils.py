@@ -10,19 +10,23 @@ from model.model import YoloOnnxDetection, YoloOnnxSegmentation
 @dataclass
 class ModelInfo:
     """
-    A dataclass to represent information about a yolo model.
+    A dataclass to represent information about a YOLO model.
 
     Attributes:
-        type (str): The type of the model ('detection' or 'segmentation').
-        name (str): The name of the model (e.g., 'yolov8s', 'yolov5s-seg').
-        input_size (tuple[int, int]): The size of the input data as a tuple (height, width).
-        version (Literal[5, 8, 10]): The version of the model, restricted to 5, 8 or 10.
+       type (str): The type of the YOLO model ('detection' or 'segmentation').
+       name (str): The name of the YOLO model (e.g., 'yolov8s', 'yolov5s-seg').
+       input_size (tuple[int, int]): The input size for the model, represented as a tuple of width and height. Default is (640, 640).
+       conf (float): The confidence threshold for the model's predictions. Default is 0.25.
+       iou (float): The IoU threshold for the non-maximum suppression. Default is 0.45.
+       version (Literal[5, 8, 10]): The version of the YOLO model, restricted to 5, 8 or 10. Default is 8.
     """
 
     type: str
     name: str
-    input_size: tuple[int, int]
-    version: Literal[5, 8, 10]
+    input_size: tuple[int, int] = (640, 640)
+    conf: float = 0.25
+    iou: float = 0.45
+    version: Literal[5, 8, 10] = 8
 
 
 def init_models(
@@ -37,6 +41,8 @@ def init_models(
         model.name: type2class[model.type](
             checkpoint=f"src/checkpoints/{model.type}/{model.name}.onnx",
             input_size=model.input_size,
+            conf=model.conf,
+            iou=model.iou,
             version=model.version,
         )
         for model in model_list
