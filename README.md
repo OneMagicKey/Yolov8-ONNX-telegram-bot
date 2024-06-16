@@ -127,13 +127,13 @@ follow these steps:
    folder, depending on the model type
 3) Add the model to the `model_list` in `src/bot.py` using the following format:
 
-   `ModelInfo(model_type, model_name, model_input_size, model_version)`
+   `ModelInfo(type, name, input_size, conf, iou, version)`
 
    ```python
    # Example:
 
-   ModelInfo("detection", "yolov8s", (640, 640), 8),  # small detection model
-   ModelInfo("segmentation", "yolov8m-seg", (640, 480), 8),  # medium segmentation model with rectangular input size
+   ModelInfo("detection", "yolov8s", (640, 640), version=8),  # small detection model
+   ModelInfo("segmentation", "yolov8m-seg", (640, 480), version=8),  # medium segmentation model with rectangular input size
    ```
 
 ## References
