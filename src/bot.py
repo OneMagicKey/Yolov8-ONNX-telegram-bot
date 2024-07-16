@@ -21,7 +21,7 @@ from utils import ModelInfo, create_keyboard_for_models, init_models
 class User:
     model: str
     language: Literal["en", "ru"] = "en"
-    color_scheme: Literal["equal", "random"] = "equal"
+    color_scheme: Literal["equal", "random"] = "random"
     retina_masks: bool = False
 
 
