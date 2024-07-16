@@ -120,7 +120,7 @@ follow these steps:
    height, width = (640, 640)  # [(640, 480), (480, 640), ...]
 
    # Export the model
-   model.export(format='onnx', opset=12, simplify=True, optimize=True, imgsz=(height, width))
+   model.export(format='onnx', opset=14, simplify=True, optimize=True, imgsz=(height, width))
    ```
 
 2) Place the resulting `.onnx` file in the `src/checkpoints/detection` or `src/checkpoints/segmentation`
