@@ -26,7 +26,7 @@ class YoloOnnx(ABC):
         input_size (tuple[int, int]): the input size of the model in (height, width).
         conf (float): confidence threshold for non-maximum suppression.
         iou (float): intersection over union threshold for non-maximum suppression.
-        version (Literal[5, 8]): version of YOLO model (5 or 8).
+        version (Literal[5, 8, 10, 11]): version of YOLO model.
         model (onnxruntime.InferenceSession): ONNX inference session for the model.
         colors (Colors): instance of Colors class for coloring boxes and masks.
         labels_name (defaultdict): mapping of class labels in different languages.
@@ -48,7 +48,7 @@ class YoloOnnx(ABC):
         input_size: tuple[int, int] = (640, 640),
         conf: float = 0.25,
         iou: float = 0.45,
-        version: Literal[5, 8, 10] = 8,
+        version: Literal[5, 8, 10, 11] = 8,
     ) -> None:
         self.input_size = input_size  # (h, w)
         self.conf = conf
@@ -119,14 +119,14 @@ class YoloOnnx(ABC):
         :return: output with shape (num_objects, 4+num_classes+num_masks)
         """
         match self.version:
-            case 8:
+            case 8 | 11:
                 output = output.transpose((0, 2, 1)).squeeze(0)
             case 5:
                 output = output[output[..., 4] > self.conf]
                 output[..., 5 : 5 + nc] *= output[..., 4:5]  # conf = obj_conf * cls_conf  # fmt: skip
                 output = np.delete(output, 4, axis=1)  # remove obj_conf to preserve the format   # fmt: skip
             case _:
-                output = output.squeeze(0)
+                raise ValueError(f"yolov{self.version} is not supported")
 
         return output
 
@@ -268,13 +268,10 @@ class YoloOnnxDetection(YoloOnnx):
         """
         Convert raw output to arrays of classes, confidences and boxes.
         """
-        match self.version:
-            case 10:
-                return self.v10postprocess(output[0], ratio, pad)
-            case 5 | 8:
-                return self.v5v8postprocess(output[0], ratio, pad)
-            case _:
-                raise NotImplemented
+        if self.version == 10:
+            return self.v10postprocess(output[0], ratio, pad)
+
+        return self.v5v8postprocess(output[0], ratio, pad)
 
     def __call__(
         self, img: np.ndarray, raw: bool = False, **kwargs

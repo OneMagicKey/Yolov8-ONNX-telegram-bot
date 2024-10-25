@@ -18,7 +18,7 @@ class ModelInfo:
        input_size (tuple[int, int]): The input size for the model, represented as a tuple of width and height. Default is (640, 640).
        conf (float): The confidence threshold for the model's predictions. Default is 0.25.
        iou (float): The IoU threshold for the non-maximum suppression. Default is 0.45.
-       version (Literal[5, 8, 10]): The version of the YOLO model, restricted to 5, 8 or 10. Default is 8.
+       version (Literal[5, 8, 10, 11]): The version of the YOLO model, restricted to 5, 8, 10 or 11. Default is 8.
     """
 
     type: str
@@ -26,7 +26,7 @@ class ModelInfo:
     input_size: tuple[int, int] = (640, 640)
     conf: float = 0.25
     iou: float = 0.45
-    version: Literal[5, 8, 10] = 8
+    version: Literal[5, 8, 10, 11] = 8
 
 
 def init_models(
@@ -49,8 +49,10 @@ def init_models(
     }
 
     # Warmup
-    test_img = np.ones((640, 640, 3), dtype=np.uint8)
     for model in bot_models.values():
+        size = model.input_size
+        test_img = np.ones((*size, 3), dtype=np.uint8)
+
         _ = model(test_img, raw=True)
 
     return bot_models

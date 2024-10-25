@@ -1,4 +1,3 @@
-import io
 import logging
 import os
 from collections import Counter
@@ -395,8 +394,8 @@ def main():
 
 
 model_list = [
-    ModelInfo("detection", "yolov10s", (640, 640), conf=0.1, version=10),
-    ModelInfo("segmentation", "yolov8s-seg", (640, 640), version=8),
+    ModelInfo("detection", "yolov11s", (640, 640), version=11),
+    ModelInfo("segmentation", "yolov11s-seg", (640, 640), version=11),
 ]
 
 if __name__ == "__main__":
