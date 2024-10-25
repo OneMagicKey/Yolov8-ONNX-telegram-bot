@@ -8,38 +8,37 @@
 
 <h2 align="center"><img width="768" src="example/example.png"></h2>
 
-A telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8/YOLOv10,
+A Telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8/YOLOv10/YOLOv11,
 implemented in Python + OpenCV + ONNXRuntime.
 
 Additionally, the bot can be deployed on the [Render](https://render.com) cloud platform
 for free.
 
-The webhook version of the running bot requires around 380 MB of RAM and includes 2
-**quantized** models: `yolov10s` and `yolov8s-seg`. The pooling version includes 5
-**quantized** models: `yolov5s`, `yolov8s`, `yolov10s`,`yolov5s-seg`, and `yolov8s-seg`,
-and requires around 600 MB of RAM.
-
+The **webhook version** of the bot requires around 380 MB of RAM and includes 2 **quantized** models:
+`yolov10s` and `yolov8s-seg`. The **polling version** includes 7
+**quantized** models: `yolov5s`, `yolov8s`, `yolov10s`, `yolov11s`, `yolov5s-seg`, `yolov8s-seg`, and `yolov11s-seg`,
+and requires approximately 700 MB of RAM.
 ## Features
 
-- [x] ENG / RU languages
+- [x] English / Russian language support
 - [x] Object Detection / Instance Segmentation
-- [x] Quantized YOLOv5, YOLOv8 and YOLOv10 models
+- [x] Quantized YOLOv5, YOLOv8, YOLOv10, and YOLOv11 models
 - [x] Support webhooks to deploy as a webservice on the Render platform ([webhooks-render](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/webhooks-render/) branch)
-- [x] Support pooling to run bot locally ([master](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/master/) branch)
+- [x] Support polling to run bot locally ([master](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/master/) branch)
 
-## List of bot commands
+## List of Bot Commands
 
 * `/start` - start the bot
 * `/help` - list of available commands
 * `/language` - set language preferences
 * `/model` - select a model
-* `/color_scheme` - select a color scheme (`'equal'` or `'random'` color for detected objects of the same class)
+* `/color_scheme` - select a color scheme (`'equal'` or `'random'` colors for detected objects of the same class)
 * `/retina_masks` - enable high-quality segmentation masks
 
 These commands are automatically added to the bot at startup.
 
-## Run the bot on your local machine (pooling version)
-### Run via python env (requires python>=3.10)
+## Run the Bot on Your Local Machine (Polling Version)
+### Run via Python Environment (Requires Python >= 3.10)
 
 1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
 2) Clone the repo and install all the dependencies:
@@ -50,11 +49,11 @@ These commands are automatically added to the bot at startup.
    pip install -r requirements.txt
    ```
 
-3) Add the `TELEGRAM_TOKEN` provided by BotFather to the python environment or replace
+3) Add the `TELEGRAM_TOKEN` provided by BotFather to the Python environment or replace
 `TOKEN` in `src/bot.py` with your token
 4) Run `python src/bot.py`
 
-### Run via docker
+### Run via Docker
 1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
 2) Clone the repo:
 
@@ -70,15 +69,15 @@ These commands are automatically added to the bot at startup.
    docker run yolo-bot
    ```
 
-## Deploy on the [Render](https://render.com) cloud platform (webhooks version)
-### Automatic deployment
+## Deploy on the [Render](https://render.com) Cloud Platform (Webhooks Version)
+### Automatic Deployment
 1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
 2) Create a Render account
 3) Click on the button below to deploy
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/tree/webhooks-render)
 
-### Manual deployment
+### Manual Deployment
 1) Create a telegram bot with [BotFather](https://telegram.me/BotFather)
 2) Create a Render account
 3) Go to `New` -> `Web Service` -> `Build and deploy from a Git repository`
@@ -94,11 +93,10 @@ These commands are automatically added to the bot at startup.
    * Name - `PYTHON_VERSION`, value `3.10.13`
 6) Deploy the app
 
-> Instances under the Render free plan will spin down after a period of inactivity,
-which is typically around 15 minutes. To prevent this, configure [cron-job](https://cron-job.org/)
-to send a POST request to the bot every 10 minutes, keeping it running permanently.
+> Note: Instances under the Render free plan will spin down after about 15 minutes of inactivity.
+To keep the bot running, configure a [cron-job](https://cron-job.org/) to send a POST request to the bot every 10 minutes.
 
-## Addition of new models
+## Adding New Models
 
 To add `n/s/m/l/x` versions of Yolo to the bot or to adjust the model's image input size,
 follow these steps:
@@ -123,9 +121,9 @@ follow these steps:
    model.export(format='onnx', opset=14, simplify=True, optimize=True, imgsz=(height, width))
    ```
 
-2) Place the resulting `.onnx` file in the `src/checkpoints/detection` or `src/checkpoints/segmentation`
+2) Place the resulting `.onnx` file in either the `src/checkpoints/detection` or `src/checkpoints/segmentation`
    folder, depending on the model type
-3) Add the model to the `model_list` in `src/bot.py` using the following format:
+3) Add the model to the `model_list` in `src/bot.py` using the format:
 
    `ModelInfo(type, name, input_size, conf, iou, version)`
 
