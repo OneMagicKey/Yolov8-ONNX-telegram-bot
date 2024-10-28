@@ -15,7 +15,7 @@ Additionally, the bot can be deployed on the [Render](https://render.com) cloud 
 for free.
 
 The **webhook version** of the bot requires around 380 MB of RAM and includes 2 **quantized** models:
-`yolov10s` and `yolov8s-seg`. The **polling version** includes 7
+`yolov11s` and `yolov11s-seg`. The **polling version** includes 7
 **quantized** models: `yolov5s`, `yolov8s`, `yolov10s`, `yolov11s`, `yolov5s-seg`, `yolov8s-seg`, and `yolov11s-seg`,
 and requires approximately 700 MB of RAM.
 ## Features
