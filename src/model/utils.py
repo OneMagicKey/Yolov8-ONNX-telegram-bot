@@ -129,7 +129,7 @@ def draw_masks(
     overall_mask = colored_mask.any(axis=-1, keepdims=True)  # union of the masks (h, w, 1)  # fmt: skip
     img = img * (1 - overall_mask * alpha) + colored_mask
 
-    return img
+    return img.astype(np.uint8)
 
 
 def letterbox(
