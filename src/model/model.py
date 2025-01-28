@@ -65,8 +65,13 @@ class YoloOnnx(ABC):
         """
         Create a model from the ONNX checkpoint.
         """
+        sess_option = onnxruntime.SessionOptions()
+        sess_option.intra_op_num_threads = 1
+        sess_option.enable_cpu_mem_arena = False
         model = onnxruntime.InferenceSession(
-            checkpoint, providers=["CPUExecutionProvider"]
+            checkpoint,
+            sess_options=sess_option,
+            providers=["CPUExecutionProvider"],
         )
 
         return model
