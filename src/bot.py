@@ -13,6 +13,7 @@ from aiogram.filters.command import Command
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 
+from logger import LoggingMiddleware
 from model.model import YoloOnnxDetection, YoloOnnxSegmentation
 from utils import ModelInfo, create_keyboard_for_models, init_models
 
@@ -34,7 +35,10 @@ WEBAPP_PORT = os.getenv("PORT", default=10000)
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-logging.basicConfig(level=logging.INFO)
+logging_middleware = LoggingMiddleware()
+dp.message.middleware(logging_middleware)
+dp.callback_query.middleware(logging_middleware)
+
 
 users: dict[int, User] = {}
 
