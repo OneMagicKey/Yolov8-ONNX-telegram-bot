@@ -15,7 +15,7 @@ class ModelInfo:
     Attributes:
        type (str): The type of the YOLO model ('detection' or 'segmentation').
        name (str): The name of the YOLO model (e.g., 'yolov8s', 'yolov5s-seg').
-       input_size (tuple[int, int]): The input size for the model, represented as a tuple of width and height. Default is (640, 640).
+       input_size (tuple[int, int]): The input size for the model, represented as a tuple of height and width. Default is (640, 640).
        conf (float): The confidence threshold for the model's predictions. Default is 0.25.
        iou (float): The IoU threshold for the non-maximum suppression. Default is 0.45.
        version (Literal[5, 8, 10, 11]): The version of the YOLO model, restricted to 5, 8, 10 or 11. Default is 8.

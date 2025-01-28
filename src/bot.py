@@ -62,16 +62,11 @@ async def start_command(message: types.Message):
     :param message: user message
     """
     user_id = message.from_user.id
-    if users.get(user_id) is None:
-        language_code = message.from_user.language_code
-        language = language_code if language_code in ["en", "ru"] else "en"
-    else:
-        language = users[user_id].language
+    if user_id not in users:
+        language = "ru" if message.from_user.language_code == "ru" else "en"
+        users[user_id] = User(model_list[0].name, language)  # use the first model in the list as default  # fmt: skip
 
-    user = User(model_list[0].name, language)  # use the first model in the list as default  # fmt: skip
-    users[user_id] = user
-
-    if user.language == "ru":
+    if users[user_id].language == "ru":
         text_greeting = (
             "Привет!\nОтправьте боту изображение, и он покажет вам, "
             "какие объекты он увидел на картинке"
@@ -378,4 +373,7 @@ if __name__ == "__main__":
     models = init_models(model_list)
     model_command_keyboard = create_keyboard_for_models(list(models.keys()))
 
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logging.info("Bot stopped!")
