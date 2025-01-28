@@ -12,6 +12,7 @@ import numpy as np
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
 
+from logger import LoggingMiddleware
 from model.model import YoloOnnxDetection, YoloOnnxSegmentation
 from utils import ModelInfo, create_keyboard_for_models, init_models
 
@@ -28,7 +29,10 @@ TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-logging.basicConfig(level=logging.INFO)
+logging_middleware = LoggingMiddleware()
+dp.message.middleware(logging_middleware)
+dp.callback_query.middleware(logging_middleware)
+
 
 users: dict[int, User] = {}
 
