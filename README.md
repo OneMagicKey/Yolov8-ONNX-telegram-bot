@@ -1,6 +1,7 @@
 <h2 align="center">YOLOv8-ONNX-telegram-bot</h2>
 
 <p align="center">
+<a href="https://t.me/yolov8_onnx_bot"><img src="https://img.shields.io/badge/Telegram-yolov8__onnx__bot-blue"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 <img src ="https://img.shields.io/github/repo-size/OneMagicKey/Yolov8-ONNX-telegram-bot">
 <a href="https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/actions/workflows/ci.yml"><img src="https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
