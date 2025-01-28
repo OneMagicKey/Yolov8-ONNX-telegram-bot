@@ -6,12 +6,7 @@
 !src/checkpoints/detection/*.onnx
 
 # Bot
-!src/model
-!src/__init__.py
-!src/bot.py
-!src/utils.py
+!src/**/*.py
 
 # Install files
 !requirements.txt
-
-**/__pycache__
