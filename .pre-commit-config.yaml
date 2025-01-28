@@ -3,7 +3,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: check-docstring-first
       - id: check-toml
@@ -13,23 +13,23 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
+    rev: v3.19.1
     hooks:
       - id: pyupgrade
         args: [--py310-plus]
 
   - repo: https://github.com/psf/black
-    rev: 24.2.0
+    rev: 24.10.0
     hooks:
       - id: black
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.2.1'
+    rev: 'v0.9.3'
     hooks:
       - id: ruff
         args: ["--fix"]
 
   - repo: https://github.com/crate-ci/typos
-    rev: typos-v0.10.21
+    rev: dictgen-v0.3.1
     hooks:
       - id: typos
