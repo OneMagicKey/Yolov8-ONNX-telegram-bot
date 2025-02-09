@@ -8,6 +8,7 @@
 </p>
 
 <h2 align="center"><img width="768" src="example/example.png"></h2>
+<h2 align="center"><img width="320" src="example/ducks_det.gif"> <img width="320" src="example/ducks_segm.gif"></h2>
 
 A Telegram bot for object detection and instance segmentation using YOLOv5/YOLOv8/YOLOv10/YOLOv11,
 implemented in Python + OpenCV + ONNXRuntime.
@@ -24,6 +25,7 @@ and requires approximately 700 MB of RAM.
 - [x] English / Russian language support
 - [x] Object Detection / Instance Segmentation
 - [x] Quantized YOLOv5, YOLOv8, YOLOv10, and YOLOv11 models
+- [x] Support images / short videos
 - [x] Support webhooks to deploy as a webservice on the Render platform ([webhooks-render](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/webhooks-render/) branch)
 - [x] Support polling to run bot locally ([master](https://github.com/OneMagicKey/Yolov8-ONNX-telegram-bot/blob/master/) branch)
 
@@ -119,7 +121,7 @@ follow these steps:
    height, width = (640, 640)  # [(640, 480), (480, 640), ...]
 
    # Export the model
-   model.export(format='onnx', opset=14, simplify=True, optimize=True, imgsz=(height, width))
+   model.export(format='onnx', opset=14, simplify=True, imgsz=(height, width))
    ```
 
 2) Place the resulting `.onnx` file in either the `src/checkpoints/detection` or `src/checkpoints/segmentation`

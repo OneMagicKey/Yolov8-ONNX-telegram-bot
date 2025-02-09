@@ -3,6 +3,7 @@ import os
 from collections import Counter
 from dataclasses import dataclass
 from functools import wraps
+from pathlib import Path
 from typing import Literal
 
 import aiogram
@@ -78,12 +79,12 @@ async def start_command(message: types.Message):
 
     if users[user_id].language == "ru":
         text_greeting = (
-            "Привет!\nОтправьте боту изображение, и он покажет вам, "
-            "какие объекты он увидел на картинке"
+            "Привет!\nОтправьте боту изображение или короткое видео, и он покажет вам, "
+            "какие объекты он обнаружил"
         )
     else:
         text_greeting = (
-            "Welcome to the yolo bot!\nSend me an image and "
+            "Welcome to the yolo bot!\nSend me an image or a short video and "
             "I will display the objects I've found"
         )
 
@@ -106,8 +107,8 @@ async def help_command(message: types.Message):
             "\nКоманда /language позволяет выбрать язык бота, команда /model изменяет "
             "архитектуру модели. С помощью команды /color_scheme можно изменять "
             "цветовую схему найденных объектов\n"
-            "\nОтправьте боту изображение, и он покажет вам, какие объекты он увидел "
-            "на картинке"
+            "\nОтправьте боту изображение или короткое видео, и он покажет вам, какие "
+            "объекты объекты он обнаружил"
         )
     else:
         text = (
@@ -115,7 +116,8 @@ async def help_command(message: types.Message):
             "\nUse the /language command to set the language preferences and the "
             "/model command to select the architecture of the model. The /color_scheme "
             "command allows you to change the colour scheme of detected objects\n"
-            "\nSend an image to the bot and it will display the detected objects"
+            "\nSend an image or a short video to the bot and it will display the "
+            "detected objects"
         )
 
     await message.answer(text)
@@ -219,7 +221,28 @@ async def retina_masks_command(message: types.Message):
     )
 
 
-async def model_forward(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
+@dp.message(aiogram.F.photo)
+@auth
+async def process_image(message: types.Message):
+    """
+    Detect objects in the image from the message.
+
+    :param message: user message with an attached image
+    """
+    user: User = users[message.from_user.id]
+
+    file_io = await message.bot.download(file=message.photo[-1])
+    img = cv2.imdecode(np.frombuffer(file_io.read(), np.uint8), cv2.IMREAD_COLOR)
+
+    result_img, text = await model_process_image(img, user)
+
+    _, img_encode = cv2.imencode(".jpg", result_img)
+    result_img = types.BufferedInputFile(img_encode.tobytes(), "result_img")
+
+    await message.answer_photo(result_img, caption=text)
+
+
+async def model_process_image(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
     """
     Perform a forward pass through the model and render the resulting image
 
@@ -247,25 +270,79 @@ async def model_forward(img: np.ndarray, user: User) -> tuple[np.ndarray, str]:
     return result_img, text
 
 
-@dp.message(aiogram.F.photo)
+@dp.message(aiogram.F.video)
 @auth
-async def process_image(message: types.Message):
+async def process_video(message: types.Message):
     """
-    Detect objects in the image from the message.
+    Process a video message by performing object detection or instance segmentation and
+    returning the annotated video
 
-    :param message: user message with an attached image
+    :param message: user message with an attached video
     """
     user: User = users[message.from_user.id]
 
-    file_io = await message.bot.download(file=message.photo[-1])
-    img = cv2.imdecode(np.frombuffer(file_io.read(), np.uint8), cv2.IMREAD_COLOR)
+    try:
+        file = await message.bot.get_file(file_id=message.video.file_id)
+        file_path = file.file_path
+        download_path = f"temp_{message.from_user.id}.mp4"
+        await message.bot.download_file(file_path, download_path)
 
-    result_img, text = await model_forward(img, user)
+        processed_path = await model_process_video(download_path, user)
 
-    _, img_encode = cv2.imencode(".jpg", result_img)
-    result_img = types.BufferedInputFile(img_encode.tobytes(), "result_img")
+        video = types.FSInputFile(processed_path)
+        await message.reply_video(video)
 
-    await message.answer_photo(result_img, caption=text)
+        os.remove(download_path)
+        os.remove(processed_path)
+
+    except Exception as e:
+        await message.reply(
+            f"Sorry, there was an error processing your video: {str(e)}"
+        )
+
+
+async def model_process_video(video_path: str, user: User) -> str:
+    """
+    Perform a forward pass through the model and render the resulting video
+
+    :param video_path: path to the input video file to be processed
+    :param user: user parameters
+    :return: path to the processed output video file
+    """
+    cap = cv2.VideoCapture(video_path)
+
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+    output_path = f"processed_{Path(video_path).stem}.mp4"
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+    net: YoloOnnxDetection | YoloOnnxSegmentation = models[user.model]
+
+    i = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        if not i % 2:
+            model_output = net(frame, retina_masks=user.retina_masks)
+
+        result_frame = net.render(
+            frame,
+            *model_output,
+            language=user.language,
+        )
+
+        i += 1
+        out.write(result_frame)
+
+    cap.release()
+    out.release()
+
+    return output_path
 
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("yolo")))
