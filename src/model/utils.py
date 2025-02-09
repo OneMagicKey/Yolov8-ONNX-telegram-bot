@@ -182,7 +182,7 @@ def process_masks(
     :return: masks with shape (model_height - 2*padh, model_width-2*padw, n)
     """
     # No masks after nms
-    if not mask_coefs.shape[0]:
+    if not mask_coefs.size:
         return np.zeros((*original_img_shape, 0), dtype=bool)
 
     c, mh, mw = protos.shape
