@@ -27,6 +27,7 @@ class User:
     retina_masks: bool = False
 
 
+MAX_VIDEO_FRAMES_TO_PROCESS = 300
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 WEBHOOK_PATH = f"/bot/{TOKEN}"
 WEBHOOK_URL = os.getenv("RENDER_EXTERNAL_URL") + WEBHOOK_PATH
@@ -287,7 +288,7 @@ async def process_video(message: types.Message):
         download_path = f"temp_{message.from_user.id}.mp4"
         await message.bot.download_file(file_path, download_path)
 
-        processed_path = await model_process_video(download_path, user)
+        processed_path, text_warning = await model_process_video(download_path, user)
 
         video = types.FSInputFile(processed_path)
         await message.reply_video(video)
@@ -295,13 +296,16 @@ async def process_video(message: types.Message):
         os.remove(download_path)
         os.remove(processed_path)
 
+        if text_warning:
+            await message.reply(text_warning)
+
     except Exception as e:
         await message.reply(
             f"Sorry, there was an error processing your video: {str(e)}"
         )
 
 
-async def model_process_video(video_path: str, user: User) -> str:
+async def model_process_video(video_path: str, user: User) -> tuple[str, str]:
     """
     Perform a forward pass through the model and render the resulting video
 
@@ -322,7 +326,7 @@ async def model_process_video(video_path: str, user: User) -> str:
     net: YoloOnnxDetection | YoloOnnxSegmentation = models[user.model]
 
     i = 0
-    while cap.isOpened():
+    while cap.isOpened() and i < MAX_VIDEO_FRAMES_TO_PROCESS:
         ret, frame = cap.read()
         if not ret:
             break
@@ -342,7 +346,14 @@ async def model_process_video(video_path: str, user: User) -> str:
     cap.release()
     out.release()
 
-    return output_path
+    text_warning = (
+        f"Your video is too long. Only the first {MAX_VIDEO_FRAMES_TO_PROCESS} frames "
+        f"have been processed"
+        if i == MAX_VIDEO_FRAMES_TO_PROCESS
+        else ""
+    )
+
+    return output_path, text_warning
 
 
 @dp.callback_query(aiogram.F.func(lambda call: call.data.startswith("yolo")))
